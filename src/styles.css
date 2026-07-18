@@ -1,0 +1,27 @@
+:root {
+  font-family: sans-serif;
+  --primary: #004643;
+  --secondary: #abd1c6;
+  --accent: #f9bc60;
+  --background: #fdf6e9;
+  --grid: rgba(218, 212, 200, 0.3);
+
+  --text-primary: #002220;
+  --text-inverse: #fff;
+}
+
+[data-theme='dark'] {
+  --primary: #3aa6a0;
+  --secondary: #7bd4cc;
+  --accent: #ffb86b;
+
+  --background: #1a1f1e;
+  --grid: rgba(91, 192, 184, 0.12);
+
+  --text-primary: #f1f7f6;
+  --text-inverse: #121615;
+}
+
+* {
+  color: var(--text-primary);
+}

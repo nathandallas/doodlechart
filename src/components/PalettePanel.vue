@@ -69,7 +69,7 @@ function handleSwatchClick(e, i) {
   outline-offset: 2px;
 }
 .swatch-fill.selected {
-  outline-color: black;
+  outline-color: var(--text-primary);
 }
 .swatch {
   width: 32px;

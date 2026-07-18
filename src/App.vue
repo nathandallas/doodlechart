@@ -8,9 +8,3 @@
   </nav>
   <RouterView />
 </template>
-
-<style>
-* {
-  font-family: sans-serif;
-}
-</style>
