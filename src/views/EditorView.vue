@@ -7,6 +7,7 @@ import NavBar from '@/components/NavBar.vue'
 
 const chart = reactive(createChart(10, 8))
 const currentColor = ref(2)
+const canvasMode = ref('chevron')
 
 function onPaint({ row, col }) {
   setCell(chart, row, col, currentColor.value)
@@ -44,7 +45,23 @@ function onRemoveColor(index) {
       @add-color="addColor"
       @remove-color="onRemoveColor"
     />
-    <ChartCanvas :chart="chart" @paint="onPaint" />
+    <div class="canvas-toolbar">
+      <button
+        type="button"
+        :class="{ active: canvasMode === 'grid' }"
+        @click="canvasMode = 'grid'"
+      >
+        Grid
+      </button>
+      <button
+        type="button"
+        :class="{ active: canvasMode === 'chevron' }"
+        @click="canvasMode = 'chevron'"
+      >
+        Chevron
+      </button>
+    </div>
+    <ChartCanvas :chart="chart" :mode="canvasMode" @paint="onPaint" />
   </div>
 </template>
 
@@ -56,5 +73,19 @@ function onRemoveColor(index) {
 }
 .palette-row {
   padding: 1rem 0;
+}
+.canvas-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.canvas-toolbar button {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--text-primary);
+  background: none;
+  cursor: pointer;
+}
+.canvas-toolbar button.active {
+  background: var(--accent);
 }
 </style>

@@ -29,7 +29,7 @@ const { theme, toggleTheme } = useTheme()
         @click="toggleTheme"
         :aria-label="theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'"
       >
-        <Moon v-if="theme === 'light'" :size="20" color="white" />
+        <Moon v-if="theme === 'light'" :size="20" />
         <Sun v-else :size="20" />
       </button>
     </div>
