@@ -1,8 +1,10 @@
-<!-- HomeView.vue -->
-<script setup></script>
+<script setup>
+import NavBar from '@/components/NavBar.vue';
+</script>
 
 <template>
-  <h1>DoodleChart</h1>
+  <NavBar />
+  <h2>DoodleChart</h2>
   <p>A colorwork chart maker.</p>
   <RouterLink to="/editor">Editor</RouterLink>
   <RouterLink to="/about">About</RouterLink>

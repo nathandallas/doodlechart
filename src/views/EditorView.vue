@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue'
 import { createChart, setCell, removeColor } from '../engine/chart.js'
 import ChartCanvas from '../components/ChartCanvas.vue'
 import PalettePanel from '@/components/PalettePanel.vue'
+import NavBar from '@/components/NavBar.vue'
 
 const chart = reactive(createChart(10, 8))
 const currentColor = ref(2)
@@ -31,15 +32,29 @@ function onRemoveColor(index) {
 </script>
 
 <template>
-  <h1>Editor</h1>
-  <PalettePanel
-    class="palette-row"
-    :palette="chart.palette"
-    :selected="currentColor"
-    @select="currentColor = $event"
-    @update-color="updateColor"
-    @add-color="addColor"
-    @remove-color="onRemoveColor"
-  />
-  <ChartCanvas :chart="chart" @paint="onPaint" />
+  <NavBar />
+  <div class="editor">
+    <h2>Editor</h2>
+    <PalettePanel
+      class="palette-row"
+      :palette="chart.palette"
+      :selected="currentColor"
+      @select="currentColor = $event"
+      @update-color="updateColor"
+      @add-color="addColor"
+      @remove-color="onRemoveColor"
+    />
+    <ChartCanvas :chart="chart" @paint="onPaint" />
+  </div>
 </template>
+
+<style scoped>
+.editor {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-left: 1rem;
+}
+.palette-row {
+  padding: 1rem 0;
+}
+</style>

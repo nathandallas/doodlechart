@@ -1,7 +1,10 @@
 <!-- AboutView.vue -->
 <script setup>
+import NavBar from '@/components/NavBar.vue';
+
 </script>
 
 <template>
-  <h1>About</h1>
+  <NavBar />
+  <h2>About</h2>
 </template>

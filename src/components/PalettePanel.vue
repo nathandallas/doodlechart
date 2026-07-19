@@ -17,7 +17,11 @@ function handleSwatchClick(e, i) {
   <div class="palette">
     <span class="label">Yarns</span>
     <div v-for="(color, i) in palette" :key="i" class="swatch-wrap">
-      <span class="swatch-fill" :class="{ selected: i === selected }" :style="{ background: color }"></span>
+      <span
+        class="swatch-fill"
+        :class="{ selected: i === selected }"
+        :style="{ background: color }"
+      ></span>
       <input
         type="color"
         class="swatch"
@@ -46,6 +50,7 @@ function handleSwatchClick(e, i) {
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+
 }
 .label {
   font-size: 13px;
