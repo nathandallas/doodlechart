@@ -1,16 +1,21 @@
 <script setup>
 import { reactive, ref } from 'vue'
-import { createChart, setCell, removeColor } from '../engine/chart.js'
+import { createChart, setCell, removeColor, resizeChart } from '../engine/chart.js'
 import ChartCanvas from '../components/ChartCanvas.vue'
 import PalettePanel from '@/components/PalettePanel.vue'
 import NavBar from '@/components/NavBar.vue'
+import SettingsPanel from '@/components/SettingsPanel.vue'
 
 const chart = reactive(createChart(10, 8))
 const currentColor = ref(2)
-const canvasMode = ref('chevron')
+const canvasMode = ref('grid')
 
 function onPaint({ row, col }) {
   setCell(chart, row, col, currentColor.value)
+}
+
+function onResize({ cols, rows }) {
+  resizeChart(chart, cols, rows)
 }
 
 // --- palette ---
@@ -45,22 +50,12 @@ function onRemoveColor(index) {
       @add-color="addColor"
       @remove-color="onRemoveColor"
     />
-    <div class="canvas-toolbar">
-      <button
-        type="button"
-        :class="{ active: canvasMode === 'grid' }"
-        @click="canvasMode = 'grid'"
-      >
-        Grid
-      </button>
-      <button
-        type="button"
-        :class="{ active: canvasMode === 'chevron' }"
-        @click="canvasMode = 'chevron'"
-      >
-        Chevron
-      </button>
-    </div>
+    <SettingsPanel
+      :chart="chart"
+      :mode="canvasMode"
+      @update-mode="canvasMode = $event"
+      @resize="onResize"
+    />
     <ChartCanvas :chart="chart" :mode="canvasMode" @paint="onPaint" />
   </div>
 </template>
@@ -73,19 +68,5 @@ function onRemoveColor(index) {
 }
 .palette-row {
   padding: 1rem 0;
-}
-.canvas-toolbar {
-  display: flex;
-  gap: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-.canvas-toolbar button {
-  padding: 0.35rem 0.75rem;
-  border: 1px solid var(--text-primary);
-  background: none;
-  cursor: pointer;
-}
-.canvas-toolbar button.active {
-  background: var(--accent);
 }
 </style>

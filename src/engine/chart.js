@@ -18,6 +18,17 @@ export function setCell(chart, row, col, colorIndex) {
   return true
 }
 
+// Resizes the chart, preserving existing cells that still fit and filling new ones with background
+export function resizeChart(chart, cols, rows) {
+  cols = Math.max(1, Math.floor(cols))
+  rows = Math.max(1, Math.floor(rows))
+  chart.cells = Array.from({ length: rows }, (_, r) =>
+    Array.from({ length: cols }, (_, c) => chart.cells[r]?.[c] ?? 0),
+  )
+  chart.cols = cols
+  chart.rows = rows
+}
+
 // Removes color from chart and updates cells with that color to bg color
 export function removeColor(chart, index) {
   if (chart.palette.length <= 1 || index === 0) return
