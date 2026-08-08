@@ -6,7 +6,7 @@ defineProps({
   mode: { type: String, required: true },
 })
 
-const emit = defineEmits(['update-mode', 'resize'])
+const emit = defineEmits(['update-mode', 'resize', 'update-grid-color'])
 
 function applySize(cols, rows) {
   emit('resize', { cols: Number(cols), rows: Number(rows) })
@@ -32,6 +32,13 @@ function applySize(cols, rows) {
         >
           Chevron
         </button>
+        <input
+          type="color"
+          class="swatch"
+          :value="chart.gridColor"
+          :aria-label="'Grid Color'"
+          @input="emit('update-grid-color', $event.target.value)"
+        />
       </div>
     </div>
 
@@ -73,5 +80,18 @@ function applySize(cols, rows) {
   display: flex;
   gap: 16px;
   margin-bottom: 16px;
+}
+
+.options {
+  position: relative;
+}
+.swatch {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  appearance: none;
+  background: none;
 }
 </style>

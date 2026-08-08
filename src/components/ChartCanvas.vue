@@ -61,7 +61,7 @@ function handlePointerUp() {
           :key="c"
           :points="stitchPoints(c, r)"
           :fill="chart.palette[colorIndex]"
-          stroke="rgba(0,0,0,0.15)"
+          :stroke="chart.gridColor"
         />
       </template>
     </template>
@@ -75,7 +75,7 @@ function handlePointerUp() {
           :width="CELL_SIZE"
           :height="CELL_SIZE"
           :fill="chart.palette[colorIndex]"
-          stroke="rgba(0,0,0,0.15)"
+          :stroke="chart.gridColor"
         />
       </template>
     </template>

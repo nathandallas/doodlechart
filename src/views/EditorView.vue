@@ -14,8 +14,13 @@ function onPaint({ row, col }) {
   setCell(chart, row, col, currentColor.value)
 }
 
+// --- grid ---
 function onResize({ cols, rows }) {
   resizeChart(chart, cols, rows)
+}
+
+function updateGridColor(color) {
+  chart.gridColor = color
 }
 
 // --- palette ---
@@ -55,6 +60,7 @@ function onRemoveColor(index) {
       :mode="canvasMode"
       @update-mode="canvasMode = $event"
       @resize="onResize"
+      @update-grid-color="updateGridColor"
     />
     <ChartCanvas :chart="chart" :mode="canvasMode" @paint="onPaint" />
   </div>

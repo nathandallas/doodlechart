@@ -3,6 +3,7 @@ export function createChart(cols, rows) {
     cols,
     rows,
     palette: ['#F7F4EE', '#bc5953', '#c47fa0', '#7b75da', '#3984a3', '#7a9e5e'],
+    gridColor: '#000000',
     cells: Array.from({ length: rows }, () => Array.from({ length: cols }, () => 0)),
   }
 }
