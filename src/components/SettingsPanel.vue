@@ -1,4 +1,6 @@
 <script setup>
+import GaugeSettings from './SettingsOptions/GaugeSettings.vue'
+
 defineProps({
   chart: { type: Object, required: true },
   mode: { type: String, required: true },
@@ -61,9 +63,7 @@ function applySize(cols, rows) {
 
     <div class="group">
       <h3>GAUGE</h3>
-      <div class="options">
-        <label></label>
-      </div>
+      <GaugeSettings />
     </div>
   </div>
 </template>
