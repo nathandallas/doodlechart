@@ -48,9 +48,8 @@ function handleSwatchClick(e, i) {
 .palette {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 2px;
   flex-wrap: wrap;
-
 }
 .label {
   font-size: 13px;
@@ -68,10 +67,10 @@ function handleSwatchClick(e, i) {
   left: 4px;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
   pointer-events: none;
   outline: 2px solid transparent;
   outline-offset: 2px;
+  border: 1px solid var(--text-primary);
 }
 .swatch-fill.selected {
   outline-color: var(--text-primary);
@@ -81,7 +80,6 @@ function handleSwatchClick(e, i) {
   height: 32px;
   padding: 0;
   border: none;
-  border-radius: 50%;
   cursor: pointer;
   appearance: none;
   background: none;
@@ -89,8 +87,8 @@ function handleSwatchClick(e, i) {
 }
 .remove {
   position: absolute;
-  top: -7px;
-  right: -7px;
+  top: 0px;
+  right: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,6 +98,8 @@ function handleSwatchClick(e, i) {
   font-size: 1rem;
   line-height: 1;
   border-radius: 50%;
+  background: none;
+  border: none;
 }
 .bg-tag {
   position: absolute;
@@ -112,8 +112,8 @@ function handleSwatchClick(e, i) {
   padding: 0;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
   font-size: 1rem;
   line-height: 1rem;
+  border-radius: 0;
 }
 </style>

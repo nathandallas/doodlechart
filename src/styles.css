@@ -1,5 +1,19 @@
+@font-face {
+  font-family: 'Fixel';
+  src: url('../src/assets/fonts/FixelText-Regular.woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Rozha One';
+  src: url('../src/assets/fonts/RozhaOne-Regular.woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  font-family: sans-serif;
   --primary: #004643;
   --secondary: #abd1c6;
   --accent: #f9bc60;
@@ -24,6 +38,7 @@
 
 * {
   color: var(--text-primary);
+  font-family: 'Fixel', sans-serif;
   box-sizing: border-box;
   margin: 0;
 }
@@ -32,7 +47,11 @@ body {
   background-color: var(--background);
 }
 
+h1,
+h2 {
+  font-family: 'Rozha One', sans-serif;
+}
+
 h3 {
   font-weight: 200;
-  
 }

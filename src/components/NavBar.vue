@@ -81,6 +81,10 @@ nav a:last-child {
   padding-right: 0;
 }
 
+nav a:hover {
+  color: var(--text-inverse);
+}
+
 .toggle-theme {
   display: flex;
   align-items: center;

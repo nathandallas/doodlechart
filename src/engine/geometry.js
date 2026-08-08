@@ -2,7 +2,7 @@
 
 export const STITCH = {
   WIDTH: 26,
-  THICKNESS: 18, // THICKNESS and row spacing
+  THICKNESS: 20, // THICKNESS and row spacing
   DEPTH: 15,
 }
 
@@ -15,6 +15,8 @@ export function stitchPoints(col, row, { WIDTH, THICKNESS, DEPTH } = STITCH) {
   const pts = [
     [x, y], // A outer top-left
     [mx, y + DEPTH], // B upper dip
+    [mx, y + DEPTH + THICKNESS], // center line B to E
+    [mx, y + DEPTH], // center line E to B
     [x + WIDTH, y], // C outer top-right
     [x + WIDTH, y + THICKNESS], // D lower right
     [mx, y + DEPTH + THICKNESS], // E lower dip

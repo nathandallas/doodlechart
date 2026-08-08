@@ -32,6 +32,7 @@ function applySize(cols, rows) {
         </button>
       </div>
     </div>
+
     <div class="group">
       <h3>SIZE</h3>
       <div class="options">
@@ -55,6 +56,13 @@ function applySize(cols, rows) {
             @change="applySize(chart.cols, $event.target.value)"
           />
         </label>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>GAUGE</h3>
+      <div class="options">
+        <label></label>
       </div>
     </div>
   </div>
