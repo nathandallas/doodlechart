@@ -48,9 +48,16 @@ watch(gaugeStitches, markCustomIfManualInput)
 watch(gaugeRows, markCustomIfManualInput)
 
 // When user updates span input, scale # of stitches accordingly
+// TODO: Handle when input goes to 0 and then is increased to a positive number
+// TODO: Handle error when increasing rows and then switching to a different yarn weight
+//       and back, sometimes the numbers don't update correctly
 function scaleStitchCountToSpan(countRef, newSpan, oldSpan) {
   if (!oldSpan) return
+  applyingPreset = true
   countRef.value = Math.round(countRef.value * (newSpan / oldSpan) * 10) / 10
+  nextTick(() => {
+    applyingPreset = false
+  })
 }
 
 watch(gaugeStitchSpan, (newSpan, oldSpan) => {

@@ -48,7 +48,7 @@ function handleSwatchClick(e, i) {
 .palette {
   display: flex;
   align-items: center;
-  gap: 2px;
+
   flex-wrap: wrap;
 }
 .label {
@@ -57,23 +57,18 @@ function handleSwatchClick(e, i) {
 }
 .swatch-wrap {
   position: relative;
-  margin: 0;
-  padding: 4px;
+  margin: 5px 0 0 0;
 }
 
 .swatch-fill {
   position: absolute;
-  top: 4px;
-  left: 4px;
   width: 32px;
   height: 32px;
   pointer-events: none;
-  outline: 2px solid transparent;
-  outline-offset: 2px;
   border: 1px solid var(--text-primary);
 }
 .swatch-fill.selected {
-  outline-color: var(--text-primary);
+  border: 2px solid var(--text-primary);
 }
 .swatch {
   width: 32px;
@@ -87,20 +82,25 @@ function handleSwatchClick(e, i) {
 }
 .remove {
   position: absolute;
-  top: 0px;
-  right: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: -2px;
+  right: 0px;
   width: 20px;
   height: 20px;
-  padding: 0;
   font-size: 1rem;
   line-height: 1;
-  border-radius: 50%;
   background: none;
   border: none;
 }
+
+.remove:hover {
+  color: red;
+}
+
+.remove:active {
+  transform: scale(0.7);
+  color: var(--text-primary);
+}
+
 .bg-tag {
   position: absolute;
   top: -14px;
@@ -109,11 +109,24 @@ function handleSwatchClick(e, i) {
   font-size: 10px;
 }
 .add {
+  position: relative;
+  top: 0;
+  border: 1px solid var(--text-primary);
+  background: none;
+  margin: 0;
   padding: 0;
   width: 32px;
   height: 32px;
   font-size: 1rem;
   line-height: 1rem;
   border-radius: 0;
+}
+
+.add:hover {
+  background-color: var(--grid);
+}
+
+.add:active {
+  transform: scale(0.9);
 }
 </style>
