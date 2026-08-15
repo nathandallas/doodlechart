@@ -2,6 +2,7 @@
 const props = defineProps({
   palette: { type: Array, required: true },
   selected: { type: Number, required: true },
+  vertical: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['select', 'update-color', 'add-color', 'remove-color'])
@@ -14,7 +15,7 @@ function handleSwatchClick(e, i) {
 </script>
 
 <template>
-  <div class="palette">
+  <div class="palette" :class="{ vertical }">
     <span class="label">Yarns</span>
     <div v-for="(color, i) in palette" :key="i" class="swatch-wrap">
       <span
@@ -38,7 +39,7 @@ function handleSwatchClick(e, i) {
       >
         ×
       </button>
-      <span v-if="i === 0" class="bg-tag">background</span>
+      <span v-if="i === 0" class="bg-tag">base</span>
     </div>
     <button class="add" @click="emit('add-color')" aria-label="Add yarn">+</button>
   </div>
@@ -48,16 +49,25 @@ function handleSwatchClick(e, i) {
 .palette {
   display: flex;
   align-items: center;
-
   flex-wrap: wrap;
 }
+.palette.vertical {
+  flex-direction: column;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+}
+
 .label {
   font-size: 13px;
-  margin-right: 2px;
 }
+
 .swatch-wrap {
   position: relative;
-  margin: 5px 0 0 0;
+  margin: 0;
+}
+
+.palette.vertical .swatch-wrap {
+  margin: 0;
 }
 
 .swatch-fill {
@@ -103,7 +113,7 @@ function handleSwatchClick(e, i) {
 
 .bg-tag {
   position: absolute;
-  top: -14px;
+  top: 14px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 10px;
@@ -112,6 +122,7 @@ function handleSwatchClick(e, i) {
   position: relative;
   top: 0;
   border: 1px solid var(--text-primary);
+  color: var(--text-primary);
   background: none;
   margin: 0;
   padding: 0;
@@ -128,5 +139,9 @@ function handleSwatchClick(e, i) {
 
 .add:active {
   transform: scale(0.9);
+}
+
+button {
+  box-shadow: none;
 }
 </style>

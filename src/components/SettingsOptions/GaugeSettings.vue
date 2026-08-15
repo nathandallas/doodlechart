@@ -84,46 +84,93 @@ function toggleUnits() {
 </script>
 
 <template>
-  <div>
-    <div class="field-label">Yarn weight</div>
-    <select v-model="preset">
-      <option value="lace">Lace</option>
-      <option value="fingering">Fingering</option>
-      <option value="sport">Sport</option>
-      <option value="dk">DK</option>
-      <option value="worsted">Worsted</option>
-      <option value="aran">Aran</option>
-      <option value="bulky">Bulky</option>
-      <option value="super_bulky">Super Bulky</option>
-      <option value="custom">Custom</option>
-    </select>
-
-    <div class="row">
-      <div class="field">
-        <input type="number" v-model.number="gaugeStitches" />
-        <span>stitches in</span>
-      </div>
-      <div class="field">
-        <input type="number" v-model.number="gaugeStitchSpan" />
-        <span>{{ useCm ? 'cm' : 'inches' }}</span>
-      </div>
+  <div class="gauge-settings">
+    <div class="weight">
+      <div class="field-label">Yarn Weight</div>
+      <select v-model="preset">
+        <option value="lace">Lace</option>
+        <option value="fingering">Fingering</option>
+        <option value="sport">Sport</option>
+        <option value="dk">DK</option>
+        <option value="worsted">Worsted</option>
+        <option value="aran">Aran</option>
+        <option value="bulky">Bulky</option>
+        <option value="super_bulky">Super Bulky</option>
+        <option value="custom">Custom</option>
+      </select>
     </div>
-
-    <div class="row">
-      <div class="field">
-        <input type="number" v-model.number="gaugeRows" />
-        <span>rows in</span>
+    <div class="edit-gauge">
+      <div class="row">
+        <div class="field">
+          <input type="number" v-model.number="gaugeStitches" />
+          <span>stitches in</span>
+        </div>
+        <div class="field unit">
+          <input type="number" v-model.number="gaugeStitchSpan" />
+          <span>{{ useCm ? 'cm' : 'inches' }}</span>
+        </div>
       </div>
-      <div class="field">
-        <input type="number" v-model.number="gaugeRowSpan" />
-        <span>{{ useCm ? 'cm' : 'inches' }}</span>
-      </div>
-    </div>
 
-    <div class="unit-toggle">
-      <button @click="toggleUnits()">Use {{ useCm ? 'inches' : 'cm' }}</button>
+      <div class="row">
+        <div class="field">
+          <input type="number" v-model.number="gaugeRows" />
+          <span>rows in</span>
+        </div>
+        <div class="field unit">
+          <input type="number" v-model.number="gaugeRowSpan" />
+          <span>{{ useCm ? 'cm' : 'inches' }}</span>
+        </div>
+      </div>
+
+      <div class="unit-toggle">
+        <button @click="toggleUnits()">Use {{ useCm ? 'inches' : 'cm' }}</button>
+      </div>
     </div>
   </div>
 </template>
 
-<style></style>
+<style>
+.gauge-settings {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.weight {
+  min-width: 150px;
+  margin-right: 16px;
+}
+
+.edit-gauge {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.row + .row {
+  margin-top: 8px;
+}
+
+.unit-toggle {
+  align-self: flex-end;
+  margin-top: 8px;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.field:not(.unit) {
+  min-width: 160px;
+}
+
+.field input {
+  max-width: 80px;
+}
+</style>

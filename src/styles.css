@@ -55,3 +55,57 @@ h2 {
 h3 {
   font-weight: 200;
 }
+
+input,
+select {
+  width: 100%;
+  color: rgb(36, 35, 42);
+  font-size: 1rem;
+  line-height: 10px;
+  padding: 0 0 0 4px;
+  border: 2px solid transparent;
+  box-shadow:
+    rgb(0 0 0 / 12%) 0px 1px 3px,
+    rgb(0 0 0 / 24%) 0px 1px 2px;
+  background: rgb(251, 251, 251);
+  transition: all 0.1s ease 0s;
+  :focus {
+    border: 2px solid var(--primary);
+  }
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.5rem;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--text-inverse);
+  background: var(--primary);
+  border: 2px solid transparent;
+  box-shadow:
+    rgb(0 0 0 / 12%) 0px 1px 3px,
+    rgb(0 0 0 / 24%) 0px 1px 2px;
+  cursor: pointer;
+  transition: all 0.1s ease 0s;
+}
+
+button:hover {
+  background: var(--secondary);
+  color: var(--text-primary);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+button:focus-visible {
+  border: 2px solid var(--accent);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}

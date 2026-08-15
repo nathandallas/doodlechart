@@ -46,15 +46,6 @@ function onRemoveColor(index) {
   <NavBar />
   <div class="editor">
     <h2>Editor</h2>
-    <PalettePanel
-      class="palette-row"
-      :palette="chart.palette"
-      :selected="currentColor"
-      @select="currentColor = $event"
-      @update-color="updateColor"
-      @add-color="addColor"
-      @remove-color="onRemoveColor"
-    />
     <SettingsPanel
       :chart="chart"
       :mode="canvasMode"
@@ -62,17 +53,37 @@ function onRemoveColor(index) {
       @resize="onResize"
       @update-grid-color="updateGridColor"
     />
-    <ChartCanvas :chart="chart" :mode="canvasMode" @paint="onPaint" />
+    <div class="canvas-row">
+      <PalettePanel
+        class="palette-sidebar"
+        vertical
+        :palette="chart.palette"
+        :selected="currentColor"
+        @select="currentColor = $event"
+        @update-color="updateColor"
+        @add-color="addColor"
+        @remove-color="onRemoveColor"
+      />
+      <ChartCanvas :chart="chart" :mode="canvasMode" @paint="onPaint" />
+    </div>
   </div>
 </template>
 
 <style scoped>
 .editor {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
   padding-left: 1rem;
 }
-.palette-row {
-  padding: 1rem 0;
+
+.canvas-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.palette-sidebar {
+  flex-shrink: 0;
+  padding: 0;
 }
 </style>

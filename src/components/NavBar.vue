@@ -63,14 +63,11 @@ const { theme, toggleTheme } = useTheme()
   fill: var(--text-primary);
 }
 
-svg {
-  fill: var(--secondary);
-}
-
 .header-wave {
   display: block;
   width: 100%;
   height: 30px;
+  fill: var(--secondary);
 }
 
 nav a {
@@ -94,5 +91,7 @@ nav a:hover {
   cursor: pointer;
   padding: 0.5rem;
   color: inherit;
+  box-shadow: none;
 }
+
 </style>
