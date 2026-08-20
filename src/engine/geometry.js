@@ -1,13 +1,7 @@
 // --- CHEVRON STITCH GEOMETRY ---
 
-export const STITCH = {
-  WIDTH: 26,
-  THICKNESS: 20, // THICKNESS and row spacing
-  DEPTH: 15,
-}
-
 // SVG points for chevron stitch
-export function stitchPoints(col, row, { WIDTH, THICKNESS, DEPTH } = STITCH) {
+export function stitchPoints(col, row, { WIDTH, THICKNESS, DEPTH }) {
   const x = col * WIDTH
   const y = row * THICKNESS
   const mx = x + WIDTH / 2
@@ -25,12 +19,12 @@ export function stitchPoints(col, row, { WIDTH, THICKNESS, DEPTH } = STITCH) {
   return pts.map(([px, py]) => `${px},${py}`).join(' ')
 }
 
-export function stitchViewSize(cols, rows, { WIDTH, THICKNESS, DEPTH } = STITCH) {
+export function stitchViewSize(cols, rows, { WIDTH, THICKNESS, DEPTH }) {
   return { width: cols * WIDTH, height: rows * THICKNESS + DEPTH }
 }
 
 // Hit test to account for chevron dip
-export function stitchAtPoint(px, py, cols, rows, { WIDTH, THICKNESS, DEPTH } = STITCH) {
+export function stitchAtPoint(px, py, cols, rows, { WIDTH, THICKNESS, DEPTH }) {
   const col = Math.floor(px / WIDTH)
   if (col < 0 || col >= cols) return null
   const xInCell = px - col * WIDTH

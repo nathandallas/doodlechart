@@ -3,7 +3,7 @@ export function createChart(cols, rows) {
     cols,
     rows,
     palette: ['#F7F4EE', '#bc5953', '#c47fa0', '#7b75da', '#3984a3', '#7a9e5e'],
-    gridColor: '#000000',
+    gridColor: '#666',
     cells: Array.from({ length: rows }, () => Array.from({ length: cols }, () => 0)),
   }
 }
@@ -19,7 +19,7 @@ export function setCell(chart, row, col, colorIndex) {
   return true
 }
 
-// Resizes the chart, preserving existing cells that still fit and filling new ones with background
+
 export function resizeChart(chart, cols, rows) {
   cols = Math.max(1, Math.floor(cols))
   rows = Math.max(1, Math.floor(rows))

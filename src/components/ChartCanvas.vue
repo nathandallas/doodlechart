@@ -1,20 +1,35 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { stitchPoints, stitchViewSize, stitchAtPoint } from '../engine/geometry.js'
+import { stitchDimensionsForGauge } from '../engine/gauge.js'
+
 
 const props = defineProps({
   chart: { type: Object, required: true },
   mode: { type: String, default: 'grid' },
+  gauge: { type: [String, Object], default: 'worsted' },
 })
 
-const CELL_SIZE = 24
 const isPainting = ref(false)
 const emit = defineEmits(['paint', 'stroke-start', 'stroke-end'])
 
+// Get stitch dimensions from gauge
+const dims = computed(() => stitchDimensionsForGauge(props.gauge))
+const stitchGeom = computed(() => ({
+  WIDTH: dims.value.W,
+  THICKNESS: dims.value.T,
+  DEPTH: dims.value.D,
+}))
+
+const cellSize = computed(() => ({ width: dims.value.W, height: dims.value.T }))
+
 const viewSize = computed(() =>
   props.mode === 'chevron'
-    ? stitchViewSize(props.chart.cols, props.chart.rows)
-    : { width: props.chart.cols * CELL_SIZE, height: props.chart.rows * CELL_SIZE },
+    ? stitchViewSize(props.chart.cols, props.chart.rows, stitchGeom.value)
+    : {
+        width: props.chart.cols * cellSize.value.width,
+        height: props.chart.rows * cellSize.value.height,
+      },
 )
 
 function getCellFromEvent(e) {
@@ -22,9 +37,12 @@ function getCellFromEvent(e) {
   const x = e.clientX - rect.left
   const y = e.clientY - rect.top
   if (props.mode === 'chevron') {
-    return stitchAtPoint(x, y, props.chart.cols, props.chart.rows)
+    return stitchAtPoint(x, y, props.chart.cols, props.chart.rows, stitchGeom.value)
   }
-  return { row: Math.floor(y / CELL_SIZE), col: Math.floor(x / CELL_SIZE) }
+  return {
+    row: Math.floor(y / cellSize.value.height),
+    col: Math.floor(x / cellSize.value.width),
+  }
 }
 
 function handlePointerDown(e) {
@@ -59,7 +77,7 @@ function handlePointerUp() {
         <polygon
           v-for="(colorIndex, c) in row"
           :key="c"
-          :points="stitchPoints(c, r)"
+          :points="stitchPoints(c, r, stitchGeom)"
           :fill="chart.palette[colorIndex]"
           :stroke="chart.gridColor"
         />
@@ -70,10 +88,10 @@ function handlePointerUp() {
         <rect
           v-for="(colorIndex, c) in row"
           :key="c"
-          :x="c * CELL_SIZE"
-          :y="r * CELL_SIZE"
-          :width="CELL_SIZE"
-          :height="CELL_SIZE"
+          :x="c * cellSize.width"
+          :y="r * cellSize.height"
+          :width="cellSize.width"
+          :height="cellSize.height"
           :fill="chart.palette[colorIndex]"
           :stroke="chart.gridColor"
         />

@@ -1,15 +1,8 @@
 <script setup>
-import { ref, watch, nextTick } from 'vue'
-const YARN_PRESETS = {
-  lace: { stitches: 33, rows: 40 },
-  fingering: { stitches: 28, rows: 36 },
-  sport: { stitches: 24, rows: 32 },
-  dk: { stitches: 22, rows: 28 },
-  worsted: { stitches: 20, rows: 26 },
-  aran: { stitches: 18, rows: 24 },
-  bulky: { stitches: 15, rows: 20 },
-  super_bulky: { stitches: 10, rows: 14 },
-}
+import { ref, watch, watchEffect, nextTick } from 'vue'
+import { YARN_PRESETS } from '../../engine/gauge.js'
+
+const emit = defineEmits(['update-gauge'])
 
 const preset = ref('aran')
 const gaugeStitches = ref(18)
@@ -20,6 +13,17 @@ const useCm = ref(false)
 
 let applyingPreset = false
 let convertingUnits = false
+
+// Whenever the gauge changes (preset, manual counts, or span), let the
+// parent know so the chart can rescale to match.
+watchEffect(() => {
+  emit('update-gauge', {
+    stitches: gaugeStitches.value,
+    rows: gaugeRows.value,
+    stitchSpan: gaugeStitchSpan.value,
+    rowSpan: gaugeRowSpan.value,
+  })
+})
 
 watch(preset, (key) => {
   if (key === 'custom') return

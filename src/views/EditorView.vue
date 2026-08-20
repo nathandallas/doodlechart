@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { createChart, setCell, removeColor, resizeChart } from '../engine/chart.js'
+import { YARN_PRESETS } from '../engine/gauge.js'
 import ChartCanvas from '../components/ChartCanvas.vue'
 import PalettePanel from '@/components/PalettePanel.vue'
 import NavBar from '@/components/NavBar.vue'
@@ -9,9 +10,15 @@ import SettingsPanel from '@/components/SettingsPanel.vue'
 const chart = reactive(createChart(10, 8))
 const currentColor = ref(2)
 const canvasMode = ref('grid')
+const gauge = ref({ ...YARN_PRESETS.aran, stitchSpan: 4, rowSpan: 4 })
 
 function onPaint({ row, col }) {
   setCell(chart, row, col, currentColor.value)
+}
+
+// --- gauge ---
+function updateGauge(g) {
+  gauge.value = g
 }
 
 // --- grid ---
@@ -52,6 +59,7 @@ function onRemoveColor(index) {
       @update-mode="canvasMode = $event"
       @resize="onResize"
       @update-grid-color="updateGridColor"
+      @update-gauge="updateGauge"
     />
     <div class="canvas-row">
       <PalettePanel
@@ -64,7 +72,7 @@ function onRemoveColor(index) {
         @add-color="addColor"
         @remove-color="onRemoveColor"
       />
-      <ChartCanvas :chart="chart" :mode="canvasMode" @paint="onPaint" />
+      <ChartCanvas :chart="chart" :mode="canvasMode" :gauge="gauge" @paint="onPaint" />
     </div>
   </div>
 </template>

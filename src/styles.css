@@ -59,6 +59,7 @@ h3 {
 input,
 select {
   width: 100%;
+  color-scheme: light;
   color: rgb(36, 35, 42);
   font-size: 1rem;
   line-height: 10px;
@@ -72,6 +73,11 @@ select {
   :focus {
     border: 2px solid var(--primary);
   }
+}
+
+select option {
+  color: rgb(36, 35, 42);
+  background: rgb(251, 251, 251);
 }
 
 button {

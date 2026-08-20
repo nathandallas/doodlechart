@@ -9,7 +9,7 @@ defineProps({
   mode: { type: String, required: true },
 })
 
-const emit = defineEmits(['update-mode', 'resize', 'update-grid-color'])
+const emit = defineEmits(['update-mode', 'resize', 'update-grid-color', 'update-gauge'])
 
 const tabs = [
   { id: 'grid', label: 'Grid' },
@@ -67,6 +67,11 @@ function applySize(cols, rows) {
           :aria-label="'Grid Color'"
           @input="emit('update-grid-color', $event.target.value)"
         />
+        <!--
+        <label>Opacity</label>
+        <label>Weight</label>
+        <label>Thicker Lines Every X Squares</label> 
+        -->
       </div>
 
       <div v-show="activeTab === 'size'" class="options">
@@ -93,7 +98,7 @@ function applySize(cols, rows) {
       </div>
 
       <div v-show="activeTab === 'gauge'" class="options">
-        <GaugeSettings />
+        <GaugeSettings @update-gauge="emit('update-gauge', $event)" />
       </div>
     </div>
   </div>
