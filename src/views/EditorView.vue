@@ -30,6 +30,10 @@ function updateGridColor(color) {
   chart.gridColor = color
 }
 
+function updateGridOpacity(opacity) {
+  chart.gridOpacity = opacity
+}
+
 // --- palette ---
 function updateColor({ index, color }) {
   chart.palette[index] = color
@@ -59,6 +63,7 @@ function onRemoveColor(index) {
       @update-mode="canvasMode = $event"
       @resize="onResize"
       @update-grid-color="updateGridColor"
+      @update-grid-opacity="updateGridOpacity"
       @update-gauge="updateGauge"
     />
     <div class="canvas-row">

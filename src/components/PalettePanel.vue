@@ -1,4 +1,6 @@
 <script setup>
+import ColorPickerPopover from './ColorPickerPopover.vue'
+
 const props = defineProps({
   palette: { type: Array, required: true },
   selected: { type: Number, required: true },
@@ -7,30 +9,33 @@ const props = defineProps({
 
 const emit = defineEmits(['select', 'update-color', 'add-color', 'remove-color'])
 
-// Stops color panel from opening on first click, double click to change color
-function handleSwatchClick(e, i) {
+// Stops the picker from opening on first click, click again to change color
+function handleSwatchClick(i, toggle) {
+  const wasSelected = i === props.selected
   emit('select', i)
-  if (i !== props.selected) e.preventDefault()
+  if (wasSelected) toggle()
 }
 </script>
 
 <template>
   <div class="palette" :class="{ vertical }">
-    <span class="label">Yarns</span>
+    <span class="label">Yarn</span>
     <div v-for="(color, i) in palette" :key="i" class="swatch-wrap">
-      <span
-        class="swatch-fill"
-        :class="{ selected: i === selected }"
-        :style="{ background: color }"
-      ></span>
-      <input
-        type="color"
-        class="swatch"
-        :value="color"
-        :aria-label="'Yarn ' + (i + 1)"
-        @click="handleSwatchClick($event, i)"
-        @input="emit('update-color', { index: i, color: $event.target.value })"
-      />
+      <ColorPickerPopover
+        :model-value="color"
+        @update:model-value="(c) => emit('update-color', { index: i, color: c })"
+      >
+        <template #default="{ toggle }">
+          <button
+            type="button"
+            class="swatch"
+            :class="{ selected: i === selected }"
+            :style="{ background: color }"
+            :aria-label="'Yarn ' + (i + 1)"
+            @click="handleSwatchClick(i, toggle)"
+          ></button>
+        </template>
+      </ColorPickerPopover>
       <button
         v-if="i !== 0 && palette.length > 1"
         class="remove"
@@ -55,14 +60,20 @@ function handleSwatchClick(e, i) {
   flex-direction: column;
   align-items: flex-start;
   flex-wrap: nowrap;
+  gap: 1px;
 }
 
 .label {
-  font-size: 13px;
+  font-size: 1rem;
+  text-align: center;
+  width: 100%;
 }
 
 .swatch-wrap {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin: 0;
 }
 
@@ -70,25 +81,16 @@ function handleSwatchClick(e, i) {
   margin: 0;
 }
 
-.swatch-fill {
-  position: absolute;
-  width: 32px;
-  height: 32px;
-  pointer-events: none;
-  border: 1px solid var(--text-primary);
-}
-.swatch-fill.selected {
-  border: 2px solid var(--text-primary);
-}
 .swatch {
-  width: 32px;
-  height: 32px;
+  width: 2.5rem;
+  height: 2.5rem;
   padding: 0;
-  border: none;
+  border: 1px solid var(--text-primary);
+  border-radius: 0;
   cursor: pointer;
-  appearance: none;
-  background: none;
-  opacity: 0;
+}
+.swatch.selected {
+  border: 2px solid var(--text-primary);
 }
 .remove {
   position: absolute;
@@ -112,12 +114,11 @@ function handleSwatchClick(e, i) {
 }
 
 .bg-tag {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 10px;
+  font-size: 0.8rem;
+  line-height: 1rem;
+  white-space: nowrap;
 }
+
 .add {
   position: relative;
   top: 0;
@@ -126,8 +127,8 @@ function handleSwatchClick(e, i) {
   background: none;
   margin: 0;
   padding: 0;
-  width: 32px;
-  height: 32px;
+  width: 2.5rem;
+  height: 2.5rem;
   font-size: 1rem;
   line-height: 1rem;
   border-radius: 0;

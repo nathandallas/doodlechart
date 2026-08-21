@@ -4,6 +4,7 @@ export function createChart(cols, rows) {
     rows,
     palette: ['#F7F4EE', '#bc5953', '#c47fa0', '#7b75da', '#3984a3', '#7a9e5e'],
     gridColor: '#666',
+    gridOpacity: 1,
     cells: Array.from({ length: rows }, () => Array.from({ length: cols }, () => 0)),
   }
 }

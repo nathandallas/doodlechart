@@ -14,8 +14,6 @@ const useCm = ref(false)
 let applyingPreset = false
 let convertingUnits = false
 
-// Whenever the gauge changes (preset, manual counts, or span), let the
-// parent know so the chart can rescale to match.
 watchEffect(() => {
   emit('update-gauge', {
     stitches: gaugeStitches.value,

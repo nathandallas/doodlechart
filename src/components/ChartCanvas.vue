@@ -80,6 +80,7 @@ function handlePointerUp() {
           :points="stitchPoints(c, r, stitchGeom)"
           :fill="chart.palette[colorIndex]"
           :stroke="chart.gridColor"
+          :stroke-opacity="chart.gridOpacity"
         />
       </template>
     </template>
@@ -94,6 +95,7 @@ function handlePointerUp() {
           :height="cellSize.height"
           :fill="chart.palette[colorIndex]"
           :stroke="chart.gridColor"
+          :stroke-opacity="chart.gridOpacity"
         />
       </template>
     </template>

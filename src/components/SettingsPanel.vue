@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import GaugeSettings from './SettingsOptions/GaugeSettings.vue'
 import ChevronIcon from './icons/ChevronIcon.vue'
+import ColorPickerPopover from './ColorPickerPopover.vue'
 import { Square } from '@lucide/vue'
 
 defineProps({
@@ -9,7 +10,13 @@ defineProps({
   mode: { type: String, required: true },
 })
 
-const emit = defineEmits(['update-mode', 'resize', 'update-grid-color', 'update-gauge'])
+const emit = defineEmits([
+  'update-mode',
+  'resize',
+  'update-grid-color',
+  'update-grid-opacity',
+  'update-gauge',
+])
 
 const tabs = [
   { id: 'grid', label: 'Grid' },
@@ -60,17 +67,34 @@ function applySize(cols, rows) {
           <ChevronIcon color="var(--text-inverse)" />
         </button>
         <label>Color</label>
+        <ColorPickerPopover
+          :model-value="chart.gridColor"
+          @update:model-value="emit('update-grid-color', $event)"
+        >
+          <template #default="{ toggle }">
+            <button
+              type="button"
+              class="swatch"
+              :style="{ background: chart.gridColor }"
+              aria-label="Grid Color"
+              @click="toggle"
+            ></button>
+          </template>
+        </ColorPickerPopover>
+        <label>Opacity</label>
         <input
-          type="color"
-          class="swatch"
-          :value="chart.gridColor"
-          :aria-label="'Grid Color'"
-          @input="emit('update-grid-color', $event.target.value)"
+          type="range"
+          class="opacity-slider"
+          min="0"
+          max="1"
+          step="0.01"
+          :value="chart.gridOpacity"
+          :aria-label="'Grid Opacity'"
+          @input="emit('update-grid-opacity', Number($event.target.value))"
         />
         <!--
-        <label>Opacity</label>
         <label>Weight</label>
-        <label>Thicker Lines Every X Squares</label> 
+        <label>Thicker Lines Every X Squares</label>
         -->
       </div>
 
@@ -146,7 +170,7 @@ function applySize(cols, rows) {
   padding-top: 1rem;
 }
 
-.tab-content input.swatch {
+.tab-content .swatch {
   border-radius: 0;
   box-shadow: none;
 }
@@ -165,7 +189,7 @@ function applySize(cols, rows) {
   width: 32px;
   height: 32px;
   padding: 0;
-  border: none;
+  border: 1px solid var(--text-primary);
   cursor: pointer;
   appearance: none;
   background: none;
@@ -175,5 +199,14 @@ function applySize(cols, rows) {
 .icon-btn {
   width: 32px;
   height: 32px;
+}
+
+.opacity-slider {
+  width: 100px;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  background: none;
+  accent-color: var(--primary);
 }
 </style>
