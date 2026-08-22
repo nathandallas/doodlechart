@@ -7,7 +7,7 @@ import PalettePanel from '@/components/PalettePanel.vue'
 import NavBar from '@/components/NavBar.vue'
 import SettingsPanel from '@/components/SettingsPanel.vue'
 
-const chart = reactive(createChart(10, 8))
+const chart = reactive(createChart(20, 22))
 const currentColor = ref(2)
 const canvasMode = ref('grid')
 const gauge = ref({ ...YARN_PRESETS.aran, stitchSpan: 4, rowSpan: 4 })

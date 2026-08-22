@@ -11,6 +11,7 @@ const props = defineProps({
 
 const isPainting = ref(false)
 const emit = defineEmits(['paint', 'stroke-start', 'stroke-end'])
+const hoveredCell = ref(null)
 
 // Get stitch dimensions from gauge
 const dims = computed(() => stitchDimensionsForGauge(props.gauge))
@@ -59,9 +60,14 @@ function handlePointerDown(e) {
 }
 
 function handlePointerMove(e) {
-  if (!isPainting.value) return
   const cell = getCellFromEvent(e)
+  hoveredCell.value = cell
+  if (!isPainting.value) return
   if (cell) emit('paint', cell)
+}
+
+function handlePointerLeave() {
+  hoveredCell.value = null
 }
 
 function handlePointerUp() {
@@ -76,6 +82,7 @@ function handlePointerUp() {
         v-for="c in colIndex"
         :key="c"
         class="chart-label"
+        :class="{ bold: hoveredCell?.col === c }"
         :style="{ left: c * cellSize.width + cellSize.width / 2 + 'px' }"
         >{{ colNum(c) }}</span
       >
@@ -86,6 +93,7 @@ function handlePointerUp() {
         <span
           v-if="rowNum(r) % 2 === 0"
           class="chart-label"
+          :class="{ bold: hoveredCell?.row === r }"
           :style="{ top: r * cellSize.height + cellSize.height / 2 + 'px' }"
           >{{ rowNum(r) }}</span
         >
@@ -98,6 +106,7 @@ function handlePointerUp() {
       @pointerdown="handlePointerDown"
       @pointermove="handlePointerMove"
       @pointerup="handlePointerUp"
+      @pointerleave="handlePointerLeave"
     >
       <template v-if="mode === 'chevron'">
         <template v-for="(row, r) in chart.cells" :key="r">
@@ -126,6 +135,26 @@ function handlePointerUp() {
           />
         </template>
       </template>
+
+      <polygon
+        v-if="mode === 'chevron' && hoveredCell"
+        :points="stitchPoints(hoveredCell.col, hoveredCell.row, stitchGeom)"
+        fill="none"
+        :stroke="chart.gridColor"
+        stroke-width="2"
+        pointer-events="none"
+      />
+      <rect
+        v-if="mode !== 'chevron' && hoveredCell"
+        :x="hoveredCell.col * cellSize.width"
+        :y="hoveredCell.row * cellSize.height"
+        :width="cellSize.width"
+        :height="cellSize.height"
+        fill="none"
+        :stroke="chart.gridColor"
+        stroke-width="2"
+        pointer-events="none"
+      />
     </svg>
 
     <div class="chart-labels chart-labels-right" :style="{ height: viewSize.height + 'px' }">
@@ -133,6 +162,7 @@ function handlePointerUp() {
         <span
           v-if="rowNum(r) % 2 === 1"
           class="chart-label"
+          :class="{ bold: hoveredCell?.row === r }"
           :style="{ top: r * cellSize.height + cellSize.height / 2 + 'px' }"
           >{{ rowNum(r) }}</span
         >
@@ -144,6 +174,7 @@ function handlePointerUp() {
         v-for="c in colIndex"
         :key="c"
         class="chart-label"
+        :class="{ bold: hoveredCell?.col === c }"
         :style="{ left: c * cellSize.width + cellSize.width / 2 + 'px' }"
         >{{ colNum(c) }}</span
       >
@@ -201,5 +232,10 @@ function handlePointerUp() {
 .chart-labels-left .chart-label,
 .chart-labels-right .chart-label {
   left: 50%;
+}
+
+.chart-label.bold {
+  font-weight: 900;
+  color: var(--text-header);
 }
 </style>
