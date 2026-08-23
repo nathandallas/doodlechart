@@ -55,6 +55,7 @@ function getCellFromEvent(e) {
 function handlePointerDown(e) {
   isPainting.value = true
   e.currentTarget.setPointerCapture(e.pointerId)
+  emit('stroke-start')
   const cell = getCellFromEvent(e)
   if (cell) emit('paint', cell)
 }
@@ -72,6 +73,7 @@ function handlePointerLeave() {
 
 function handlePointerUp() {
   isPainting.value = false
+  emit('stroke-end')
 }
 </script>
 

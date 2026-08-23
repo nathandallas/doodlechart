@@ -20,7 +20,6 @@ export function setCell(chart, row, col, colorIndex) {
   return true
 }
 
-
 export function resizeChart(chart, cols, rows) {
   cols = Math.max(1, Math.floor(cols))
   rows = Math.max(1, Math.floor(rows))
@@ -29,6 +28,12 @@ export function resizeChart(chart, cols, rows) {
   )
   chart.cols = cols
   chart.rows = rows
+}
+
+export function clearChart(chart) {
+  chart.cells = Array.from({ length: chart.rows }, () =>
+    Array.from({ length: chart.cols }, () => 0),
+  )
 }
 
 // Removes color from chart and updates cells with that color to bg color

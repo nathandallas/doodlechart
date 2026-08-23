@@ -111,6 +111,9 @@ function toggleUnits() {
           <input type="number" v-model.number="gaugeStitchSpan" />
           <span>{{ useCm ? 'cm' : 'inches' }}</span>
         </div>
+        <div class="unit-toggle">
+          <button @click="toggleUnits()">Use {{ useCm ? 'inches' : 'cm' }}</button>
+        </div>
       </div>
 
       <div class="row">
@@ -122,10 +125,6 @@ function toggleUnits() {
           <input type="number" v-model.number="gaugeRowSpan" />
           <span>{{ useCm ? 'cm' : 'inches' }}</span>
         </div>
-      </div>
-
-      <div class="unit-toggle">
-        <button @click="toggleUnits()">Use {{ useCm ? 'inches' : 'cm' }}</button>
       </div>
     </div>
   </div>

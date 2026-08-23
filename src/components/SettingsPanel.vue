@@ -3,11 +3,14 @@ import { ref } from 'vue'
 import GaugeSettings from './SettingsOptions/GaugeSettings.vue'
 import ChevronIcon from './icons/ChevronIcon.vue'
 import ColorPickerPopover from './ColorPickerPopover.vue'
-import { Square } from '@lucide/vue'
+import { Square, Undo2, Redo2, Paintbrush, Eraser, Trash2 } from '@lucide/vue'
 
 defineProps({
   chart: { type: Object, required: true },
   mode: { type: String, required: true },
+  tool: { type: String, required: true },
+  canUndo: { type: Boolean, default: false },
+  canRedo: { type: Boolean, default: false },
 })
 
 const emit = defineEmits([
@@ -19,8 +22,8 @@ const emit = defineEmits([
 ])
 
 const tabs = [
+  { id: 'editor', label: 'Editor' },
   { id: 'grid', label: 'Grid' },
-  { id: 'size', label: 'Size' },
   { id: 'gauge', label: 'Gauge' },
 ]
 const activeTab = ref(tabs[0].id)
@@ -39,15 +42,61 @@ function applySize(cols, rows) {
         type="button"
         role="tab"
         class="tab"
-        :class="{ active: activeTab === tab.id }"
+        :class="{ active: activeTab === tab.id, 'tab-editor': tab.id === 'editor' }"
         :aria-selected="activeTab === tab.id"
         @click="activeTab = tab.id"
       >
         {{ tab.label }}
       </button>
     </div>
-
     <div class="tab-content">
+      <div v-show="activeTab === 'editor'" class="options editor-options">
+        <label>Tool</label>
+        <button
+          type="button"
+          class="icon-btn"
+          :class="{ active: tool === 'paint' }"
+          aria-label="Paintbrush"
+          @click="emit('update-tool', 'paint')"
+        >
+          <Paintbrush color="var(--text-inverse)" :stroke-width="1.8" />
+        </button>
+        <button
+          type="button"
+          class="icon-btn"
+          :class="{ active: tool === 'erase' }"
+          aria-label="Erase"
+          @click="emit('update-tool', 'erase')"
+        >
+          <Eraser color="var(--text-inverse)" :stroke-width="1.8" />
+        </button>
+
+        <div class="divider" aria-hidden="true"></div>
+
+        <label>History</label>
+        <button
+          type="button"
+          class="icon-btn"
+          :disabled="!canUndo"
+          aria-label="Undo"
+          @click="emit('undo')"
+        >
+          <Undo2 color="var(--text-inverse)" :stroke-width="1.8" />
+        </button>
+        <button
+          type="button"
+          class="icon-btn"
+          :disabled="!canRedo"
+          aria-label="Redo"
+          @click="emit('redo')"
+        >
+          <Redo2 color="var(--text-inverse)" :stroke-width="1.8" />
+        </button>
+        <button type="button" class="icon-btn" aria-label="Clear canvas" @click="emit('clear')">
+          <Trash2 color="var(--text-inverse)" :stroke-width="1.8" />
+        </button>
+      </div>
+
       <div v-show="activeTab === 'grid'" class="options grid-options">
         <label>Shape</label>
         <button
@@ -66,39 +115,10 @@ function applySize(cols, rows) {
         >
           <ChevronIcon color="var(--text-inverse)" />
         </button>
-        <label>Color</label>
-        <ColorPickerPopover
-          :model-value="chart.gridColor"
-          @update:model-value="emit('update-grid-color', $event)"
-        >
-          <template #default="{ toggle }">
-            <button
-              type="button"
-              class="swatch"
-              :style="{ background: chart.gridColor }"
-              aria-label="Grid Color"
-              @click="toggle"
-            ></button>
-          </template>
-        </ColorPickerPopover>
-        <label>Opacity</label>
-        <input
-          type="range"
-          class="opacity-slider"
-          min="0"
-          max="1"
-          step="0.01"
-          :value="chart.gridOpacity"
-          :aria-label="'Grid Opacity'"
-          @input="emit('update-grid-opacity', Number($event.target.value))"
-        />
-        <!--
-        <label>Weight</label>
-        <label>Thicker Lines Every X Squares</label>
-        -->
-      </div>
 
-      <div v-show="activeTab === 'size'" class="options">
+        <div class="divider" aria-hidden="true"></div>
+
+        <label>Size</label>
         <label>
           Stitches
           <input
@@ -119,7 +139,41 @@ function applySize(cols, rows) {
             @change="applySize(chart.cols, $event.target.value)"
           />
         </label>
+
+        <div class="divider" aria-hidden="true"></div>
+
+        <label>Color</label>
+        <ColorPickerPopover
+          :model-value="chart.gridColor"
+          @update:model-value="emit('update-grid-color', $event)"
+        >
+          <template #default="{ toggle }">
+            <button
+              type="button"
+              class="swatch"
+              :style="{ background: chart.gridColor }"
+              aria-label="Grid Color"
+              @click="toggle"
+            ></button>
+          </template>
+        </ColorPickerPopover>
+        <label>Opacity</label>
+        <input
+          type="range"
+          class="opacity-slider"
+          min="0.11"
+          max="1"
+          step="0.01"
+          :value="chart.gridOpacity"
+          :aria-label="'Grid Opacity'"
+          @input="emit('update-grid-opacity', Number($event.target.value))"
+        />
+        <!--
+        <label>Thicker Lines Every X Squares</label>
+        -->
       </div>
+
+      <div v-show="activeTab === 'size'" class="options"></div>
 
       <div v-show="activeTab === 'gauge'" class="options">
         <GaugeSettings @update-gauge="emit('update-gauge', $event)" />
@@ -166,8 +220,17 @@ function applySize(cols, rows) {
   border-bottom-color: var(--primary);
 }
 
+.tab.tab-editor {
+  font-family: 'Rozha One', sans-serif;
+  font-size: 1.5rem;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+}
+
 .tab-content {
-  padding-top: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--grid);
 }
 
 .tab-content .swatch {
@@ -185,6 +248,12 @@ function applySize(cols, rows) {
 .grid-options {
   gap: 8px;
 }
+
+.divider {
+  align-self: stretch;
+  width: 1px;
+  background: var(--grid);
+}
 .swatch {
   width: 32px;
   height: 32px;
@@ -199,6 +268,14 @@ function applySize(cols, rows) {
 .icon-btn {
   width: 32px;
   height: 32px;
+}
+
+.icon-btn.active {
+  background: var(--secondary);
+}
+.icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .opacity-slider {

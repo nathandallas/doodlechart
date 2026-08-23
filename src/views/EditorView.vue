@@ -1,6 +1,6 @@
 <script setup>
-import { reactive, ref } from 'vue'
-import { createChart, setCell, removeColor, resizeChart } from '../engine/chart.js'
+import { reactive, ref, onMounted, onUnmounted } from 'vue'
+import { createChart, setCell, removeColor, resizeChart, clearChart } from '../engine/chart.js'
 import { YARN_PRESETS } from '../engine/gauge.js'
 import ChartCanvas from '../components/ChartCanvas.vue'
 import PalettePanel from '@/components/PalettePanel.vue'
@@ -11,9 +11,13 @@ const chart = reactive(createChart(20, 22))
 const currentColor = ref(2)
 const canvasMode = ref('grid')
 const gauge = ref({ ...YARN_PRESETS.aran, stitchSpan: 4, rowSpan: 4 })
+const tool = ref('paint')
+const history = ref([])
+const redoStack = ref([])
 
 function onPaint({ row, col }) {
-  setCell(chart, row, col, currentColor.value)
+  const colorIndex = tool.value === 'erase' ? 0 : currentColor.value
+  setCell(chart, row, col, colorIndex)
 }
 
 // --- gauge ---
@@ -44,23 +48,74 @@ function addColor() {
   currentColor.value = chart.palette.length - 1
 }
 
-// When color is removed or updated they are replaced with either bg or new color
+// When color is removed or updated cells are replaced with bg color
 function onRemoveColor(index) {
   removeColor(chart, index)
   if (currentColor.value >= chart.palette.length) {
     currentColor.value = chart.palette.length - 1
   }
 }
+
+// --- undo / redo / clear ---
+function snapshot() {
+  return chart.cells.map((row) => [...row])
+}
+
+function pushHistory() {
+  history.value.push(snapshot())
+  redoStack.value = []
+}
+
+function undo() {
+  if (history.value.length === 0) return
+  redoStack.value.push(snapshot())
+  chart.cells = history.value.pop()
+}
+
+function redo() {
+  if (redoStack.value.length === 0) return
+  history.value.push(snapshot())
+  chart.cells = redoStack.value.pop()
+}
+
+function onClear() {
+  pushHistory()
+  clearChart(chart)
+}
+
+function onKeydown(e) {
+  const mod = e.ctrlKey || e.metaKey
+  if (!mod) return
+  const key = e.key.toLowerCase()
+
+  if (key === 'z' && !e.shiftKey) {
+    e.preventDefault()
+    undo()
+  } else if ((key === 'y' && !e.metaKey) || (key === 'z' && e.shiftKey)) {
+    e.preventDefault()
+    redo()
+  }
+}
+
+
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>
   <NavBar />
   <div class="editor">
-    <h2>Editor</h2>
     <SettingsPanel
       :chart="chart"
       :mode="canvasMode"
+      :tool="tool"
+      :can-undo="history.length > 0"
+      :can-redo="redoStack.length > 0"
       @update-mode="canvasMode = $event"
+      @update-tool="tool = $event"
+      @undo="undo"
+      @redo="redo"
+      @clear="onClear"
       @resize="onResize"
       @update-grid-color="updateGridColor"
       @update-grid-opacity="updateGridOpacity"
@@ -77,7 +132,13 @@ function onRemoveColor(index) {
         @add-color="addColor"
         @remove-color="onRemoveColor"
       />
-      <ChartCanvas :chart="chart" :mode="canvasMode" :gauge="gauge" @paint="onPaint" />
+      <ChartCanvas
+        :chart="chart"
+        :mode="canvasMode"
+        :gauge="gauge"
+        @paint="onPaint"
+        @stroke-start="pushHistory"
+      />
     </div>
   </div>
 </template>
