@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import GaugeSettings from './SettingsOptions/GaugeSettings.vue'
 import ChevronIcon from './icons/ChevronIcon.vue'
 import ColorPickerPopover from './ColorPickerPopover.vue'
-import { Square, Undo2, Redo2, Paintbrush, Eraser, Trash2 } from '@lucide/vue'
+import { Square, Undo2, Redo2, Paintbrush, Eraser, Trash2, RectangleHorizontal } from '@lucide/vue'
 
 defineProps({
   chart: { type: Object, required: true },
@@ -105,7 +105,7 @@ function applySize(cols, rows) {
           :class="{ active: mode === 'grid' }"
           @click="emit('update-mode', 'grid')"
         >
-          <Square color="var(--text-inverse)" :stroke-width="1.8" />
+          <RectangleHorizontal color="var(--text-inverse)" :stroke-width="1.8" />
         </button>
         <button
           type="button"
@@ -114,6 +114,14 @@ function applySize(cols, rows) {
           @click="emit('update-mode', 'chevron')"
         >
           <ChevronIcon color="var(--text-inverse)" />
+        </button>
+        <button
+          type="button"
+          class="icon-btn"
+          :class="{ active: mode === 'square-grid' }"
+          @click="emit('update-mode', 'square-grid')"
+        >
+          <Square color="var(--text-inverse)" :stroke-width="1.8" />
         </button>
 
         <div class="divider" aria-hidden="true"></div>

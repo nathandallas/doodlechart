@@ -10,12 +10,17 @@ export const YARN_PRESETS = {
 }
 
 export function stitchDimensionsForGauge(gauge, { baseHeight = 18, dipRatio = 15 / 18 } = {}) {
-  const { stitches, rows, stitchSpan = 4, rowSpan = 4 } =
+  const { stitches, rows, stitchSpan = 4, rowSpan = 4, square = false } =
     typeof gauge === 'string' ? YARN_PRESETS[gauge] : gauge
-  if (!stitches || !rows) {
+  if (!square && (!stitches || !rows)) {
     throw new Error(`Unknown gauge preset or invalid gauge object: ${gauge}`)
   }
-  
+
+  if (square) {
+    const size = 24
+    return { W: size, T: size, D: Math.round(size * dipRatio) }
+  }
+
   const aspect = (stitchSpan * rows) / (rowSpan * stitches)
   const T = baseHeight
   const W = Math.round(T * aspect)

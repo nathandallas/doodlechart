@@ -13,8 +13,13 @@ const isPainting = ref(false)
 const emit = defineEmits(['paint', 'stroke-start', 'stroke-end'])
 const hoveredCell = ref(null)
 
-// Get stitch dimensions from gauge
-const dims = computed(() => stitchDimensionsForGauge(props.gauge))
+// Get stitch dimensions from gauge (square-grid mode draws fixed-size
+// squares and ignores the selected gauge entirely)
+const dims = computed(() =>
+  props.mode === 'square-grid'
+    ? stitchDimensionsForGauge({ square: true })
+    : stitchDimensionsForGauge(props.gauge),
+)
 const stitchGeom = computed(() => ({
   WIDTH: dims.value.W,
   THICKNESS: dims.value.T,

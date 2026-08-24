@@ -16,15 +16,9 @@ A colorwork tool for fiber artists.
     - Local Storage for settings and drawings
 
   - Grid
-    - numbers for each row - 1 at bottom right and highest number at top left to match knitting pattern
-    - line opacity
-    - shape adjusts based on gauge and matches when transitioning from chevron to square
     - optional - thicker lines for 5x5 sections, default can be changed to user preference
-    - thicker stroke on hover
 
-  - Toolbar
-    - UI update where each option is a drawer that slides out below when making changes
-
+  - Gauge
     - Calculator for the final size of an object based on gauge and stitch count
 
   - Nice to have
