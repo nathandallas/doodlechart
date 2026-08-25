@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { stitchPoints, stitchViewSize, stitchAtPoint } from '../engine/geometry.js'
 import { stitchDimensionsForGauge } from '../engine/gauge.js'
 
@@ -7,19 +7,21 @@ const props = defineProps({
   chart: { type: Object, required: true },
   mode: { type: String, default: 'grid' },
   gauge: { type: [String, Object], default: 'worsted' },
+  zoom: { type: Number, default: 1 },
 })
 
 const isPainting = ref(false)
-const emit = defineEmits(['paint', 'stroke-start', 'stroke-end'])
+const emit = defineEmits(['paint', 'stroke-start', 'stroke-end', 'zoom'])
 const hoveredCell = ref(null)
+const wrapperEl = ref(null)
 
-// Get stitch dimensions from gauge (square-grid mode draws fixed-size
-// squares and ignores the selected gauge entirely)
-const dims = computed(() =>
-  props.mode === 'square-grid'
-    ? stitchDimensionsForGauge({ square: true })
-    : stitchDimensionsForGauge(props.gauge),
-)
+
+const dims = computed(() => {
+  const options = { baseHeight: 18 * props.zoom }
+  return props.mode === 'square-grid'
+    ? stitchDimensionsForGauge({ square: true }, options)
+    : stitchDimensionsForGauge(props.gauge, options)
+})
 const stitchGeom = computed(() => ({
   WIDTH: dims.value.W,
   THICKNESS: dims.value.T,
@@ -80,10 +82,19 @@ function handlePointerUp() {
   isPainting.value = false
   emit('stroke-end')
 }
+
+function handleWheel(e) {
+  if (!(e.ctrlKey || e.metaKey)) return
+  e.preventDefault()
+  emit('zoom', e.deltaY < 0 ? 1 : -1)
+}
+
+onMounted(() => wrapperEl.value?.addEventListener('wheel', handleWheel, { passive: false }))
+onBeforeUnmount(() => wrapperEl.value?.removeEventListener('wheel', handleWheel))
 </script>
 
 <template>
-  <div class="chart-grid-wrapper">
+  <div ref="wrapperEl" class="chart-grid-wrapper" :style="{ '--zoom': zoom }">
     <div class="chart-labels chart-labels-top" :style="{ width: viewSize.width + 'px' }">
       <span
         v-for="c in colIndex"
@@ -210,25 +221,25 @@ function handlePointerUp() {
 }
 .chart-labels-top {
   grid-area: top;
-  height: 1.4em;
+  height: calc(1.4em * var(--zoom, 1));
 }
 .chart-labels-bottom {
   grid-area: bottom;
-  height: 1.4em;
+  height: calc(1.4em * var(--zoom, 1));
 }
 .chart-labels-left {
   grid-area: left;
-  width: 1.6em;
+  width: calc(1.6em * var(--zoom, 1));
 }
 .chart-labels-right {
   grid-area: right;
-  width: 1.6em;
+  width: calc(1.6em * var(--zoom, 1));
 }
 
 .chart-label {
   position: absolute;
   transform: translate(-50%, -50%);
-  font-size: 0.85rem;
+  font-size: calc(0.85rem * var(--zoom, 1));
   color: var(--text-primary);
   white-space: nowrap;
 }

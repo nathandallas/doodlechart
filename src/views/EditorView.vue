@@ -15,6 +15,29 @@ const tool = ref('paint')
 const history = ref([])
 const redoStack = ref([])
 
+// --- zoom ---
+const ZOOM_MIN = 0.25
+const ZOOM_MAX = 3
+const ZOOM_STEP = 0.1
+const zoom = ref(1)
+
+function setZoom(value) {
+  const clamped = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, value))
+  zoom.value = Math.round(clamped * 100) / 100
+}
+
+function zoomIn() {
+  setZoom(zoom.value + ZOOM_STEP)
+}
+
+function zoomOut() {
+  setZoom(zoom.value - ZOOM_STEP)
+}
+
+function onWheelZoom(direction) {
+  setZoom(zoom.value + direction * ZOOM_STEP)
+}
+
 function onPaint({ row, col }) {
   const colorIndex = tool.value === 'erase' ? 0 : currentColor.value
   setCell(chart, row, col, colorIndex)
@@ -97,7 +120,6 @@ function onKeydown(e) {
   }
 }
 
-
 onMounted(() => window.addEventListener('keydown', onKeydown))
 onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 </script>
@@ -111,6 +133,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
       :tool="tool"
       :can-undo="history.length > 0"
       :can-redo="redoStack.length > 0"
+      :zoom="zoom"
       @update-mode="canvasMode = $event"
       @update-tool="tool = $event"
       @undo="undo"
@@ -120,6 +143,9 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
       @update-grid-color="updateGridColor"
       @update-grid-opacity="updateGridOpacity"
       @update-gauge="updateGauge"
+      @zoom-in="zoomIn"
+      @zoom-out="zoomOut"
+      @update-zoom="setZoom"
     />
     <div class="canvas-row">
       <PalettePanel
@@ -132,13 +158,17 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         @add-color="addColor"
         @remove-color="onRemoveColor"
       />
-      <ChartCanvas
-        :chart="chart"
-        :mode="canvasMode"
-        :gauge="gauge"
-        @paint="onPaint"
-        @stroke-start="pushHistory"
-      />
+      <div class="canvas-scroll">
+        <ChartCanvas
+          :chart="chart"
+          :mode="canvasMode"
+          :gauge="gauge"
+          :zoom="zoom"
+          @paint="onPaint"
+          @stroke-start="pushHistory"
+          @zoom="onWheelZoom"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -159,5 +189,11 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 .palette-sidebar {
   flex-shrink: 0;
   padding: 0;
+}
+
+.canvas-scroll {
+  min-width: 0;
+  padding: 1rem 1.5rem 1.5rem 0;
+  overflow: auto;
 }
 </style>

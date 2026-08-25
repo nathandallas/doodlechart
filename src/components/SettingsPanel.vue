@@ -11,6 +11,7 @@ defineProps({
   tool: { type: String, required: true },
   canUndo: { type: Boolean, default: false },
   canRedo: { type: Boolean, default: false },
+  zoom: { type: Number, default: 1 },
 })
 
 const emit = defineEmits([
@@ -23,6 +24,9 @@ const emit = defineEmits([
   'update-grid-color',
   'update-grid-opacity',
   'update-gauge',
+  'zoom-in',
+  'zoom-out',
+  'update-zoom',
 ])
 
 const tabs = [
@@ -56,10 +60,14 @@ const activeTab = ref(tabs[0].id)
           :tool="tool"
           :can-undo="canUndo"
           :can-redo="canRedo"
+          :zoom="zoom"
           @update-tool="emit('update-tool', $event)"
           @undo="emit('undo')"
           @redo="emit('redo')"
           @clear="emit('clear')"
+          @zoom-in="emit('zoom-in')"
+          @zoom-out="emit('zoom-out')"
+          @update-zoom="emit('update-zoom', $event)"
         />
       </div>
 

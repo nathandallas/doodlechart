@@ -17,7 +17,7 @@ export function stitchDimensionsForGauge(gauge, { baseHeight = 18, dipRatio = 15
   }
 
   if (square) {
-    const size = 24
+    const size = Math.round(baseHeight * (24 / 18))
     return { W: size, T: size, D: Math.round(size * dipRatio) }
   }
 
