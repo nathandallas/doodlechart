@@ -18,21 +18,11 @@
   --secondary: #abd1c6;
   --accent: #e7bb41ff;
   --background: #e7e5dfff;
-  --grid: rgba(218, 212, 200, 0.3);
+  --grid: rgba(112, 106, 95, 0.3);
 
   --text-primary: #002220;
   --text-inverse: #e7e5dfff;
   --text-header: #002220;
-
-  --mint: #d6f8d6; /* text: #000000 */
-  --teal: #7fc6a4; /* text: #000000 */
-  --slate: #5d737e; /* text: #ffffff */
-  --charcoal: #55505c; /* text: #ffffff */
-  --gunmetal: #393e41ff; /* text: #ffffff */
-  --dust-grey: #d3d0cbff; /* text: #000000 */
-  --alabaster-grey: #e7e5dfff; /* text: #000000 */
-  --ocean-mist: #44bba4ff; /* text: #fff */
-  --tuscan-sun: #e7bb41ff; /* text: #000000 */
 }
 
 [data-theme='dark'] {
@@ -41,7 +31,7 @@
   --accent: #ffb86b;
 
   --background: #393e41ff;
-  --grid: rgba(91, 192, 184, 0.12);
+  --grid: rgb(35, 90, 86);
 
   --text-primary: #f1f7f6;
   --text-inverse: #121615;
@@ -82,9 +72,11 @@ select {
     rgb(0 0 0 / 24%) 0px 1px 2px;
   background: rgb(251, 251, 251);
   transition: all 0.1s ease 0s;
-  :focus {
-    border: 2px solid var(--primary);
-  }
+}
+
+input:focus,
+select:focus {
+  border: 2px solid var(--primary);
 }
 
 select option {
@@ -126,4 +118,33 @@ button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+}
+
+.options {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 8px;
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  opacity: 0.6;
+}
+
+.icon-btn.active {
+  opacity: 1;
+}
+
+.icon-btn:disabled {
+  background-color: var(--grid);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.divider {
+  align-self: stretch;
+  width: 1px;
+  background: var(--grid);
 }
