@@ -16,6 +16,7 @@
 :root {
   --primary: #44bba4ff;
   --secondary: #abd1c6;
+  --secondary60: #add2c799;
   --accent: #e7bb41ff;
   --background: #e7e5dfff;
   --grid: rgba(112, 106, 95, 0.3);
@@ -28,6 +29,7 @@
 [data-theme='dark'] {
   --primary: #abd1c6;
   --secondary: #44bba4ff;
+  --secondary60: #44bba366;
   --accent: #ffb86b;
 
   --background: #393e41ff;

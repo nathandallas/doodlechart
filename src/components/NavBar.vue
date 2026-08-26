@@ -22,7 +22,7 @@ const { theme, toggleTheme } = useTheme()
       <nav>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/editor">Editor</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/gallery">Gallery</RouterLink>
       </nav>
       <button
         class="toggle-theme"
@@ -43,6 +43,10 @@ const { theme, toggleTheme } = useTheme()
 </template>
 
 <style>
+header {
+  position: relative;
+  z-index: 1;
+}
 .nav-bar {
   display: flex;
   justify-content: space-between;
@@ -72,6 +76,7 @@ const { theme, toggleTheme } = useTheme()
 
 nav a {
   padding-right: 1rem;
+  text-decoration: none;
 }
 
 nav a:last-child {
@@ -79,7 +84,18 @@ nav a:last-child {
 }
 
 nav a:hover {
-  color: var(--text-inverse);
+  color: var(--primary);
+}
+
+nav a.router-link-exact-active {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-decoration-color: var(--primary);
+  text-underline-offset: 5px;
+}
+nav a.router-link-exact-active:hover {
+  color: var(--primary);
 }
 
 .toggle-theme {
@@ -93,5 +109,4 @@ nav a:hover {
   color: inherit;
   box-shadow: none;
 }
-
 </style>
