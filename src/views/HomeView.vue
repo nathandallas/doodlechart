@@ -6,7 +6,7 @@ import PageFooter from '@/components/PageFooter.vue'
 import GridSetupModal from '@/components/GridSetupModal.vue'
 
 const router = useRouter()
-const showSetupModal = ref(true) // TODO: revert to false before shipping — forced open for styling
+const showSetupModal = ref(false)
 
 function onSetupConfirm() {
   showSetupModal.value = false
@@ -33,7 +33,7 @@ function onSetupConfirm() {
         @confirm="onSetupConfirm"
       />
     </div>
-    <div class="gallery-preview">Gallery Preview</div>
+
     <PageFooter class="page-footer" />
   </div>
 </template>

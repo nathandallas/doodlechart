@@ -19,6 +19,22 @@ export function stitchPoints(col, row, { WIDTH, THICKNESS, DEPTH }) {
   return pts.map(([px, py]) => `${px},${py}`).join(' ')
 }
 
+
+export function traceStitchPath(ctx, col, row, { WIDTH, THICKNESS, DEPTH }) {
+  const x = col * WIDTH
+  const y = row * THICKNESS
+  const mx = x + WIDTH / 2
+  ctx.moveTo(x, y) // A outer top-left
+  ctx.lineTo(mx, y + DEPTH) // B upper dip
+  ctx.lineTo(mx, y + DEPTH + THICKNESS) // center line B to E
+  ctx.lineTo(mx, y + DEPTH) // center line E to B
+  ctx.lineTo(x + WIDTH, y) // C outer top-right
+  ctx.lineTo(x + WIDTH, y + THICKNESS) // D lower right
+  ctx.lineTo(mx, y + DEPTH + THICKNESS) // E lower dip
+  ctx.lineTo(x, y + THICKNESS) // F lower left
+  ctx.closePath()
+}
+
 export function stitchViewSize(cols, rows, { WIDTH, THICKNESS, DEPTH }) {
   return { width: cols * WIDTH, height: rows * THICKNESS + DEPTH }
 }

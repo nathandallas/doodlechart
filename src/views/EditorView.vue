@@ -200,6 +200,5 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 .canvas-scroll {
   min-width: 0;
   padding: 1rem 1.5rem 1.5rem 0;
-  overflow: auto;
 }
 </style>

@@ -6,4 +6,5 @@ import NavBar from '@/components/NavBar.vue'
 <template>
   <NavBar />
   <h2>Gallery</h2>
+  <p>Coming soon!</p>
 </template>

@@ -21,10 +21,21 @@ const draft = reactive({
 const draftGauge = reactive({ ...setup.gauge })
 const mode = ref('grid')
 
+// Reseed from the store on open so Cancel discards whatever was typed last time
 function syncOpen(v) {
   if (!dialogEl.value) return
-  if (v) dialogEl.value.showModal()
-  else dialogEl.value.close()
+  if (v) {
+    Object.assign(draft, {
+      cols: setup.cols,
+      rows: setup.rows,
+      gridColor: setup.gridColor,
+      gridOpacity: setup.gridOpacity,
+    })
+    Object.assign(draftGauge, setup.gauge)
+    dialogEl.value.showModal()
+  } else {
+    dialogEl.value.close()
+  }
 }
 
 onMounted(() => syncOpen(props.open))
@@ -39,23 +50,25 @@ function confirm() {
 <template>
   <dialog ref="dialogEl" class="setup-modal" @cancel="emit('close')">
     <h2>Customize your grid</h2>
-    <GridSettings
-      :chart="draft"
-      :mode="mode"
-      @update-mode="mode = $event"
-      @resize="
-        ({ cols, rows }) => {
-          draft.cols = cols
-          draft.rows = rows
-        }
-      "
-      @update-grid-color="(c) => (draft.gridColor = c)"
-      @update-grid-opacity="(o) => (draft.gridOpacity = o)"
-    />
-    <GaugeSettings :gauge="draftGauge" @update-gauge="(g) => Object.assign(draftGauge, g)" />
+    <template v-if="open">
+      <GridSettings
+        :chart="draft"
+        :mode="mode"
+        @update-mode="mode = $event"
+        @resize="
+          ({ cols, rows }) => {
+            draft.cols = cols
+            draft.rows = rows
+          }
+        "
+        @update-grid-color="(c) => (draft.gridColor = c)"
+        @update-grid-opacity="(o) => (draft.gridOpacity = o)"
+      />
+      <GaugeSettings :gauge="draftGauge" @update-gauge="(g) => Object.assign(draftGauge, g)" />
+    </template>
     <div class="actions">
-      <button @click="emit('close')">Cancel</button>
       <button @click="confirm">Create</button>
+      <button @class="cancel" @click="emit('close')">Cancel</button>
     </div>
   </dialog>
 </template>

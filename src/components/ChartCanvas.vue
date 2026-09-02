@@ -1,6 +1,6 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { stitchPoints, stitchViewSize, stitchAtPoint } from '../engine/geometry.js'
+import { ref, computed, watchEffect, onMounted, onBeforeUnmount } from 'vue'
+import { traceStitchPath, stitchViewSize, stitchAtPoint } from '../engine/geometry.js'
 import { stitchDimensionsForGauge } from '../engine/gauge.js'
 
 const props = defineProps({
@@ -10,11 +10,16 @@ const props = defineProps({
   zoom: { type: Number, default: 1 },
 })
 
-const isPainting = ref(false)
 const emit = defineEmits(['paint', 'stroke-start', 'stroke-end', 'zoom'])
-const hoveredCell = ref(null)
-const wrapperEl = ref(null)
 
+const isPainting = ref(false)
+const hoveredCell = ref(null)
+const viewportEl = ref(null)
+const canvasEl = ref(null)
+const scrollX = ref(0)
+const scrollY = ref(0)
+const viewW = ref(0)
+const viewH = ref(0)
 
 const dims = computed(() => {
   const options = { baseHeight: 18 * props.zoom }
@@ -30,13 +35,6 @@ const stitchGeom = computed(() => ({
 
 const cellSize = computed(() => ({ width: dims.value.W, height: dims.value.T }))
 
-// Grid numbers
-const colNum = (c) => props.chart.cols - c
-const rowNum = (r) => props.chart.rows - r
-
-const colIndex = computed(() => Array.from({ length: props.chart.cols }, (_, i) => i))
-const rowIndex = computed(() => Array.from({ length: props.chart.rows }, (_, i) => i))
-
 const viewSize = computed(() =>
   props.mode === 'chevron'
     ? stitchViewSize(props.chart.cols, props.chart.rows, stitchGeom.value)
@@ -46,41 +44,265 @@ const viewSize = computed(() =>
       },
 )
 
-function getCellFromEvent(e) {
-  const rect = e.currentTarget.getBoundingClientRect()
-  const x = e.clientX - rect.left
-  const y = e.clientY - rect.top
+// --- virtualization ---
+const visibleRange = computed(() => {
+  const { width: cw, height: ch } = cellSize.value
+  if (!cw || !ch) return { c0: 0, c1: -1, r0: 0, r1: -1 }
+  return {
+    c0: Math.max(0, Math.floor(scrollX.value / cw) - 1),
+    c1: Math.min(props.chart.cols - 1, Math.ceil((scrollX.value + viewW.value) / cw)),
+    r0: Math.max(0, Math.floor(scrollY.value / ch) - 1),
+    r1: Math.min(props.chart.rows - 1, Math.ceil((scrollY.value + viewH.value) / ch)),
+  }
+})
+
+const visibleCols = computed(() => {
+  const { c0, c1 } = visibleRange.value
+  const out = []
+  for (let c = c0; c <= c1; c++) out.push(c)
+  return out
+})
+
+const visibleRows = computed(() => {
+  const { r0, r1 } = visibleRange.value
+  const out = []
+  for (let r = r0; r <= r1; r++) out.push(r)
+  return out
+})
+
+// Grid numbers
+const colNum = (c) => props.chart.cols - c
+const rowNum = (r) => props.chart.rows - r
+
+// --- drawing ---
+function draw() {
+  const canvas = canvasEl.value
+  const vw = viewW.value
+  const vh = viewH.value
+  if (!canvas || vw <= 0 || vh <= 0) return
+
+  const dpr = window.devicePixelRatio || 1
+  const bw = Math.round(vw * dpr)
+  const bh = Math.round(vh * dpr)
+  if (canvas.width !== bw) canvas.width = bw
+  if (canvas.height !== bh) canvas.height = bh
+
+  const ctx = canvas.getContext('2d')
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  ctx.clearRect(0, 0, vw, vh)
+
+  const chart = props.chart
+  const cells = chart.cells
+  const palette = chart.palette
+  if (!cells || !cells.length) return
+
+  const { width: cw, height: ch } = cellSize.value
+  const { c0, c1, r0, r1 } = visibleRange.value
+  const geom = stitchGeom.value
+  const chevron = props.mode === 'chevron'
+  const showLines = chart.gridOpacity > 0 && cw >= 4 && ch >= 4
+
+  ctx.save()
+  ctx.translate(-scrollX.value, -scrollY.value)
+
+  let lastFill = null
+  if (chevron) {
+    for (let r = r0; r <= r1; r++) {
+      const row = cells[r]
+      if (!row) continue
+      for (let c = c0; c <= c1; c++) {
+        const fill = palette[row[c]] ?? palette[0]
+        if (fill !== lastFill) {
+          ctx.fillStyle = fill
+          lastFill = fill
+        }
+        ctx.beginPath()
+        traceStitchPath(ctx, c, r, geom)
+        ctx.fill()
+      }
+    }
+  } else {
+    for (let r = r0; r <= r1; r++) {
+      const row = cells[r]
+      if (!row) continue
+      const y = r * ch
+      for (let c = c0; c <= c1; c++) {
+        const fill = palette[row[c]] ?? palette[0]
+        if (fill !== lastFill) {
+          ctx.fillStyle = fill
+          lastFill = fill
+        }
+        ctx.fillRect(c * cw, y, cw, ch)
+      }
+    }
+  }
+
+  if (showLines) {
+    ctx.beginPath()
+    if (chevron) {
+      for (let r = r0; r <= r1; r++) {
+        for (let c = c0; c <= c1; c++) traceStitchPath(ctx, c, r, geom)
+      }
+    } else {
+      for (let c = c0; c <= c1 + 1; c++) {
+        const x = c * cw
+        ctx.moveTo(x, r0 * ch)
+        ctx.lineTo(x, (r1 + 1) * ch)
+      }
+      for (let r = r0; r <= r1 + 1; r++) {
+        const y = r * ch
+        ctx.moveTo(c0 * cw, y)
+        ctx.lineTo((c1 + 1) * cw, y)
+      }
+    }
+    ctx.lineWidth = 1
+    ctx.strokeStyle = chart.gridColor
+    ctx.globalAlpha = chart.gridOpacity
+    ctx.stroke()
+    ctx.globalAlpha = 1
+  }
+
+  const hovered = hoveredCell.value
+  if (hovered) {
+    ctx.lineWidth = 2
+    ctx.strokeStyle = chart.gridColor
+    if (chevron) {
+      ctx.beginPath()
+      traceStitchPath(ctx, hovered.col, hovered.row, geom)
+      ctx.stroke()
+    } else {
+      ctx.strokeRect(hovered.col * cw, hovered.row * ch, cw, ch)
+    }
+  }
+
+  ctx.restore()
+}
+
+watchEffect(draw, { flush: 'post' })
+
+// --- pointer handling ---
+const activePointers = new Map()
+let drawPointerId = null
+let lastCell = null
+let panState = null
+
+function cellAt(clientX, clientY, rect) {
+  const x = clientX - rect.left + scrollX.value
+  const y = clientY - rect.top + scrollY.value
   if (props.mode === 'chevron') {
     return stitchAtPoint(x, y, props.chart.cols, props.chart.rows, stitchGeom.value)
   }
-  return {
-    row: Math.floor(y / cellSize.value.height),
-    col: Math.floor(x / cellSize.value.width),
+  const col = Math.floor(x / cellSize.value.width)
+  const row = Math.floor(y / cellSize.value.height)
+  if (row < 0 || row >= props.chart.rows || col < 0 || col >= props.chart.cols) return null
+  return { row, col }
+}
+
+function paintTo(cell) {
+  if (!lastCell) {
+    emit('paint', cell)
+    lastCell = cell
+    return
   }
+  let x = lastCell.col
+  let y = lastCell.row
+  const dx = Math.abs(cell.col - x)
+  const dy = -Math.abs(cell.row - y)
+  const sx = x < cell.col ? 1 : -1
+  const sy = y < cell.row ? 1 : -1
+  let err = dx + dy
+  for (;;) {
+    emit('paint', { row: y, col: x })
+    if (x === cell.col && y === cell.row) break
+    const e2 = 2 * err
+    if (e2 >= dy) {
+      err += dy
+      x += sx
+    }
+    if (e2 <= dx) {
+      err += dx
+      y += sy
+    }
+  }
+  lastCell = cell
+}
+
+function endStroke() {
+  if (!isPainting.value) return
+  isPainting.value = false
+  if (drawPointerId !== null && canvasEl.value?.hasPointerCapture(drawPointerId)) {
+    canvasEl.value.releasePointerCapture(drawPointerId)
+  }
+  drawPointerId = null
+  lastCell = null
+  emit('stroke-end')
 }
 
 function handlePointerDown(e) {
+  activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+  // two fingers pan instead of draw
+  if (e.pointerType === 'touch' && activePointers.size === 2) {
+    endStroke()
+    const [a, b] = [...activePointers.values()]
+    panState = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+    return
+  }
+  if (panState || drawPointerId !== null) return
+
+  drawPointerId = e.pointerId
   isPainting.value = true
-  e.currentTarget.setPointerCapture(e.pointerId)
+  canvasEl.value.setPointerCapture(e.pointerId)
   emit('stroke-start')
-  const cell = getCellFromEvent(e)
-  if (cell) emit('paint', cell)
+  const cell = cellAt(e.clientX, e.clientY, canvasEl.value.getBoundingClientRect())
+  if (cell) paintTo(cell)
 }
 
 function handlePointerMove(e) {
-  const cell = getCellFromEvent(e)
-  hoveredCell.value = cell
-  if (!isPainting.value) return
-  if (cell) emit('paint', cell)
+  if (activePointers.has(e.pointerId)) {
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+  }
+
+  if (panState) {
+    const pts = [...activePointers.values()]
+    if (pts.length < 2) return
+    const cx = (pts[0].x + pts[1].x) / 2
+    const cy = (pts[0].y + pts[1].y) / 2
+    viewportEl.value?.scrollBy(panState.x - cx, panState.y - cy)
+    panState.x = cx
+    panState.y = cy
+    return
+  }
+
+  const rect = canvasEl.value.getBoundingClientRect()
+  if (e.pointerType !== 'touch') {
+    hoveredCell.value = cellAt(e.clientX, e.clientY, rect)
+  }
+
+  if (!isPainting.value || e.pointerId !== drawPointerId) return
+
+  
+  const points = e.getCoalescedEvents?.() ?? []
+  for (const p of points.length ? points : [e]) {
+    const cell = cellAt(p.clientX, p.clientY, rect)
+    if (cell) paintTo(cell)
+  }
 }
 
 function handlePointerLeave() {
   hoveredCell.value = null
 }
 
-function handlePointerUp() {
-  isPainting.value = false
-  emit('stroke-end')
+function handlePointerUp(e) {
+  activePointers.delete(e.pointerId)
+  if (panState && activePointers.size < 2) panState = null
+  if (e.pointerId === drawPointerId) endStroke()
+  if (e.pointerType === 'touch') hoveredCell.value = null
+}
+
+function handleScroll(e) {
+  scrollX.value = e.target.scrollLeft
+  scrollY.value = e.target.scrollTop
 }
 
 function handleWheel(e) {
@@ -89,113 +311,103 @@ function handleWheel(e) {
   emit('zoom', e.deltaY < 0 ? 1 : -1)
 }
 
-onMounted(() => wrapperEl.value?.addEventListener('wheel', handleWheel, { passive: false }))
-onBeforeUnmount(() => wrapperEl.value?.removeEventListener('wheel', handleWheel))
+function measure() {
+  const el = viewportEl.value
+  if (!el) return
+  viewW.value = el.clientWidth
+  viewH.value = el.clientHeight
+}
+
+let resizeObserver
+onMounted(() => {
+  measure()
+  resizeObserver = new ResizeObserver(measure)
+  resizeObserver.observe(viewportEl.value)
+  viewportEl.value?.addEventListener('wheel', handleWheel, { passive: false })
+})
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect()
+  viewportEl.value?.removeEventListener('wheel', handleWheel)
+})
 </script>
 
 <template>
-  <div ref="wrapperEl" class="chart-grid-wrapper" :style="{ '--zoom': zoom }">
-    <div class="chart-labels chart-labels-top" :style="{ width: viewSize.width + 'px' }">
-      <span
-        v-for="c in colIndex"
-        :key="c"
-        class="chart-label"
-        :class="{ bold: hoveredCell?.col === c }"
-        :style="{ left: c * cellSize.width + cellSize.width / 2 + 'px' }"
-        >{{ colNum(c) }}</span
-      >
+  <div class="chart-grid-wrapper" :style="{ '--zoom': zoom }">
+    <div class="chart-labels chart-labels-top" :style="{ width: viewW + 'px' }">
+      <div class="label-track" :style="{ transform: `translateX(${-scrollX}px)` }">
+        <span
+          v-for="c in visibleCols"
+          :key="c"
+          class="chart-label"
+          :class="{ bold: hoveredCell?.col === c }"
+          :style="{ left: c * cellSize.width + cellSize.width / 2 + 'px' }"
+          >{{ colNum(c) }}</span
+        >
+      </div>
     </div>
 
-    <div class="chart-labels chart-labels-left" :style="{ height: viewSize.height + 'px' }">
-      <template v-for="r in rowIndex" :key="r">
-        <span
-          v-if="rowNum(r) % 2 === 0"
-          class="chart-label"
-          :class="{ bold: hoveredCell?.row === r }"
-          :style="{ top: r * cellSize.height + cellSize.height / 2 + 'px' }"
-          >{{ rowNum(r) }}</span
-        >
-      </template>
+    <div class="chart-labels chart-labels-left" :style="{ height: viewH + 'px' }">
+      <div class="label-track" :style="{ transform: `translateY(${-scrollY}px)` }">
+        <template v-for="r in visibleRows" :key="r">
+          <span
+            v-if="rowNum(r) % 2 === 0"
+            class="chart-label"
+            :class="{ bold: hoveredCell?.row === r }"
+            :style="{ top: r * cellSize.height + cellSize.height / 2 + 'px' }"
+            >{{ rowNum(r) }}</span
+          >
+        </template>
+      </div>
     </div>
-    <svg
-      ref="svgEl"
-      :width="viewSize.width"
-      :height="viewSize.height"
-      @pointerdown="handlePointerDown"
-      @pointermove="handlePointerMove"
-      @pointerup="handlePointerUp"
-      @pointerleave="handlePointerLeave"
+
+    <div
+      ref="viewportEl"
+      class="chart-viewport"
+      :style="{ width: viewSize.width + 'px', height: viewSize.height + 'px' }"
+      @scroll="handleScroll"
     >
-      <template v-if="mode === 'chevron'">
-        <template v-for="(row, r) in chart.cells" :key="r">
-          <polygon
-            v-for="(colorIndex, c) in row"
-            :key="c"
-            :points="stitchPoints(c, r, stitchGeom)"
-            :fill="chart.palette[colorIndex]"
-            :stroke="chart.gridColor"
-            :stroke-opacity="chart.gridOpacity"
-          />
-        </template>
-      </template>
-      <template v-else>
-        <template v-for="(row, r) in chart.cells" :key="r">
-          <rect
-            v-for="(colorIndex, c) in row"
-            :key="c"
-            :x="c * cellSize.width"
-            :y="r * cellSize.height"
-            :width="cellSize.width"
-            :height="cellSize.height"
-            :fill="chart.palette[colorIndex]"
-            :stroke="chart.gridColor"
-            :stroke-opacity="chart.gridOpacity"
-          />
-        </template>
-      </template>
-
-      <polygon
-        v-if="mode === 'chevron' && hoveredCell"
-        :points="stitchPoints(hoveredCell.col, hoveredCell.row, stitchGeom)"
-        fill="none"
-        :stroke="chart.gridColor"
-        stroke-width="2"
-        pointer-events="none"
-      />
-      <rect
-        v-if="mode !== 'chevron' && hoveredCell"
-        :x="hoveredCell.col * cellSize.width"
-        :y="hoveredCell.row * cellSize.height"
-        :width="cellSize.width"
-        :height="cellSize.height"
-        fill="none"
-        :stroke="chart.gridColor"
-        stroke-width="2"
-        pointer-events="none"
-      />
-    </svg>
-
-    <div class="chart-labels chart-labels-right" :style="{ height: viewSize.height + 'px' }">
-      <template v-for="r in rowIndex" :key="r">
-        <span
-          v-if="rowNum(r) % 2 === 1"
-          class="chart-label"
-          :class="{ bold: hoveredCell?.row === r }"
-          :style="{ top: r * cellSize.height + cellSize.height / 2 + 'px' }"
-          >{{ rowNum(r) }}</span
-        >
-      </template>
+      <div
+        class="chart-spacer"
+        :style="{ width: viewSize.width + 'px', height: viewSize.height + 'px' }"
+      >
+        <canvas
+          ref="canvasEl"
+          class="chart-canvas"
+          :style="{ width: viewW + 'px', height: viewH + 'px' }"
+          @pointerdown="handlePointerDown"
+          @pointermove="handlePointerMove"
+          @pointerup="handlePointerUp"
+          @pointercancel="handlePointerUp"
+          @pointerleave="handlePointerLeave"
+        ></canvas>
+      </div>
     </div>
 
-    <div class="chart-labels chart-labels-bottom" :style="{ width: viewSize.width + 'px' }">
-      <span
-        v-for="c in colIndex"
-        :key="c"
-        class="chart-label"
-        :class="{ bold: hoveredCell?.col === c }"
-        :style="{ left: c * cellSize.width + cellSize.width / 2 + 'px' }"
-        >{{ colNum(c) }}</span
-      >
+    <div class="chart-labels chart-labels-right" :style="{ height: viewH + 'px' }">
+      <div class="label-track" :style="{ transform: `translateY(${-scrollY}px)` }">
+        <template v-for="r in visibleRows" :key="r">
+          <span
+            v-if="rowNum(r) % 2 === 1"
+            class="chart-label"
+            :class="{ bold: hoveredCell?.row === r }"
+            :style="{ top: r * cellSize.height + cellSize.height / 2 + 'px' }"
+            >{{ rowNum(r) }}</span
+          >
+        </template>
+      </div>
+    </div>
+
+    <div class="chart-labels chart-labels-bottom" :style="{ width: viewW + 'px' }">
+      <div class="label-track" :style="{ transform: `translateX(${-scrollX}px)` }">
+        <span
+          v-for="c in visibleCols"
+          :key="c"
+          class="chart-label"
+          :class="{ bold: hoveredCell?.col === c }"
+          :style="{ left: c * cellSize.width + cellSize.width / 2 + 'px' }"
+          >{{ colNum(c) }}</span
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -203,22 +415,41 @@ onBeforeUnmount(() => wrapperEl.value?.removeEventListener('wheel', handleWheel)
 <style scoped>
 .chart-grid-wrapper {
   display: grid;
-  grid-template-columns: auto auto auto;
-  grid-template-rows: auto auto auto;
+  grid-template-columns: auto minmax(0, auto) auto;
+  grid-template-rows: auto minmax(0, auto) auto;
   grid-template-areas:
     '.    top    .'
     'left svg    right'
     '.    bottom .';
   width: fit-content;
+  max-width: 100%;
 }
 
-.chart-grid-wrapper > svg {
+.chart-viewport {
   grid-area: svg;
+  overflow: auto;
+  max-width: 100%;
+  max-height: 70vh;
+}
+
+.chart-canvas {
+  position: sticky;
+  top: 0;
+  left: 0;
+  display: block;
+  touch-action: none;
 }
 
 .chart-labels {
   position: relative;
+  overflow: hidden;
 }
+
+.label-track {
+  position: absolute;
+  inset: 0;
+}
+
 .chart-labels-top {
   grid-area: top;
   height: calc(1.4em * var(--zoom, 1));

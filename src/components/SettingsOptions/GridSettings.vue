@@ -51,7 +51,7 @@ function applySize(cols, rows) {
       <input
         type="number"
         min="1"
-        max="300"
+        max="600"
         :value="chart.cols"
         @change="applySize($event.target.value, chart.rows)"
       />
@@ -61,7 +61,7 @@ function applySize(cols, rows) {
       <input
         type="number"
         min="1"
-        max="300"
+        max="600"
         :value="chart.rows"
         @change="applySize(chart.cols, $event.target.value)"
       />
