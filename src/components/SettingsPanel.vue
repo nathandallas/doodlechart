@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import EditorSettings from './SettingsOptions/EditorSettings.vue'
 import GridSettings from './SettingsOptions/GridSettings.vue'
 import GaugeSettings from './SettingsOptions/GaugeSettings.vue'
-import { LayoutGrid, RulerDimensionLine, SquarePen } from '@lucide/vue'
+import { Import, LayoutGrid, RulerDimensionLine, SquarePen } from '@lucide/vue'
 
 defineProps({
   chart: { type: Object, required: true },
@@ -12,6 +12,7 @@ defineProps({
   canUndo: { type: Boolean, default: false },
   canRedo: { type: Boolean, default: false },
   zoom: { type: Number, default: 1 },
+  gauge: { type: Object, default: null },
 })
 
 const emit = defineEmits([
@@ -33,6 +34,7 @@ const tabs = [
   { id: 'editor', label: 'Editor', icon: SquarePen },
   { id: 'grid', label: 'Grid', icon: LayoutGrid },
   { id: 'gauge', label: 'Gauge', icon: RulerDimensionLine },
+  { id: 'import-export', label: 'Import/Export', icon: Import },
 ]
 const activeTab = ref(tabs[0].id)
 </script>
@@ -83,7 +85,7 @@ const activeTab = ref(tabs[0].id)
       </div>
 
       <div v-show="activeTab === 'gauge'" class="options">
-        <GaugeSettings @update-gauge="emit('update-gauge', $event)" />
+        <GaugeSettings :gauge="gauge" @update-gauge="emit('update-gauge', $event)" />
       </div>
     </div>
   </div>

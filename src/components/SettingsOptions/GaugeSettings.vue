@@ -2,13 +2,25 @@
 import { ref, watch, watchEffect, nextTick } from 'vue'
 import { YARN_PRESETS } from '../../engine/gauge.js'
 
+const props = defineProps({
+  gauge: { type: Object, default: null },
+})
 const emit = defineEmits(['update-gauge'])
 
-const preset = ref('aran')
-const gaugeStitches = ref(18)
-const gaugeRows = ref(24)
-const gaugeStitchSpan = ref(4)
-const gaugeRowSpan = ref(4)
+function matchPreset(stitches, rows) {
+  const match = Object.entries(YARN_PRESETS).find(
+    ([, p]) => p.stitches === stitches && p.rows === rows,
+  )
+  return match ? match[0] : 'custom'
+}
+
+const initial = props.gauge ?? { stitches: 18, rows: 24, stitchSpan: 4, rowSpan: 4 }
+
+const preset = ref(matchPreset(initial.stitches, initial.rows))
+const gaugeStitches = ref(initial.stitches)
+const gaugeRows = ref(initial.rows)
+const gaugeStitchSpan = ref(initial.stitchSpan)
+const gaugeRowSpan = ref(initial.rowSpan)
 const useCm = ref(false)
 
 let applyingPreset = false

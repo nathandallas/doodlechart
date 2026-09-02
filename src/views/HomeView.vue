@@ -1,6 +1,17 @@
 <script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import NavBar from '@/components/NavBar.vue'
 import PageFooter from '@/components/PageFooter.vue'
+import GridSetupModal from '@/components/GridSetupModal.vue'
+
+const router = useRouter()
+const showSetupModal = ref(true) // TODO: revert to false before shipping — forced open for styling
+
+function onSetupConfirm() {
+  showSetupModal.value = false
+  router.push('/editor')
+}
 </script>
 
 <template>
@@ -13,9 +24,14 @@ import PageFooter from '@/components/PageFooter.vue'
         Design your own custom colorwork charts for knitting, crochet, cross-stitch, and more.
       </h3>
       <div class="chart-selection">
-        <button>Custom Chart</button>
+        <button @click="showSetupModal = true">Custom Chart</button>
         <button @click="$router.push('/editor')">Default Chart</button>
       </div>
+      <GridSetupModal
+        :open="showSetupModal"
+        @close="showSetupModal = false"
+        @confirm="onSetupConfirm"
+      />
     </div>
     <div class="gallery-preview">Gallery Preview</div>
     <PageFooter class="page-footer" />

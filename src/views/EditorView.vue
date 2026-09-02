@@ -1,16 +1,21 @@
 <script setup>
 import { reactive, ref, onMounted, onUnmounted } from 'vue'
 import { createChart, setCell, removeColor, resizeChart, clearChart } from '../engine/chart.js'
-import { YARN_PRESETS } from '../engine/gauge.js'
+
 import ChartCanvas from '../components/ChartCanvas.vue'
 import PalettePanel from '@/components/PalettePanel.vue'
 import NavBar from '@/components/NavBar.vue'
 import SettingsPanel from '@/components/SettingsPanel.vue'
+import { useChartSetupStore } from '@/stores/chartSetup'
+const setup = useChartSetupStore()
+const chart = reactive(createChart(setup.cols, setup.rows))
+chart.palette = [...setup.palette]
+chart.gridColor = setup.gridColor
+chart.gridOpacity = setup.gridOpacity
+const gauge = ref({ ...setup.gauge })
 
-const chart = reactive(createChart(20, 22))
 const currentColor = ref(2)
 const canvasMode = ref('grid')
-const gauge = ref({ ...YARN_PRESETS.aran, stitchSpan: 4, rowSpan: 4 })
 const tool = ref('paint')
 const history = ref([])
 const redoStack = ref([])
@@ -134,6 +139,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
       :can-undo="history.length > 0"
       :can-redo="redoStack.length > 0"
       :zoom="zoom"
+      :gauge="gauge"
       @update-mode="canvasMode = $event"
       @update-tool="tool = $event"
       @undo="undo"
