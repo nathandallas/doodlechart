@@ -1,6 +1,16 @@
 <script setup>
 import { computed } from 'vue'
-import { Paintbrush, Eraser, Undo2, Redo2, Trash2, Plus, Minus } from '@lucide/vue'
+import {
+  Paintbrush,
+  PaintBucket,
+  Eraser,
+  Undo2,
+  Redo2,
+  Trash2,
+  Plus,
+  Minus,
+  Keyboard,
+} from '@lucide/vue'
 
 const props = defineProps({
   tool: { type: String, required: true },
@@ -17,6 +27,7 @@ const emit = defineEmits([
   'zoom-in',
   'zoom-out',
   'update-zoom',
+  'toggle-shortcuts',
 ])
 
 const zoomDisplay = computed(() => Math.round(props.zoom * 100) + '%')
@@ -51,6 +62,15 @@ function onZoomInputChange(e) {
       @click="emit('update-tool', 'erase')"
     >
       <Eraser color="var(--text-inverse)" :stroke-width="1.8" />
+    </button>
+    <button
+      type="button"
+      class="icon-btn"
+      :class="{ active: tool === 'fill' }"
+      aria-label="Fill"
+      @click="emit('update-tool', 'fill')"
+    >
+      <PaintBucket color="var(--text-inverse)" :stroke-width="1.8" />
     </button>
 
     <div class="divider" aria-hidden="true"></div>
@@ -111,11 +131,25 @@ function onZoomInputChange(e) {
         <Plus color="var(--text-primary)" :stroke-width="1.8" />
       </button>
     </div>
+
+    <button
+      type="button"
+      class="icon-btn shortcuts-btn"
+      aria-label="Keyboard shortcuts"
+      title="Keyboard shortcuts (Shift+?)"
+      @click="emit('toggle-shortcuts')"
+    >
+      <Keyboard color="var(--text-inverse)" :stroke-width="1.8" />
+    </button>
   </div>
 </template>
 
 <style scoped>
 .icon-btn.history-btn:not(:disabled) {
+  opacity: 1;
+}
+
+.shortcuts-btn {
   opacity: 1;
 }
 

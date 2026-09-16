@@ -1,11 +1,20 @@
 <script setup>
-import { reactive, ref, onMounted, onUnmounted } from 'vue'
-import { createChart, setCell, removeColor, resizeChart, clearChart } from '../engine/chart.js'
+import { reactive, ref } from 'vue'
+import {
+  createChart,
+  setCell,
+  floodFill,
+  removeColor,
+  resizeChart,
+  clearChart,
+} from '../engine/chart.js'
 
 import ChartCanvas from '../components/ChartCanvas.vue'
 import PalettePanel from '@/components/PalettePanel.vue'
 import NavBar from '@/components/NavBar.vue'
 import SettingsPanel from '@/components/SettingsPanel.vue'
+import KeyboardShortcutsOverlay from '@/components/KeyboardShortcutsOverlay.vue'
+import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
 import { useChartSetupStore } from '@/stores/chartSetup'
 const setup = useChartSetupStore()
 const chart = reactive(createChart(setup.cols, setup.rows))
@@ -39,11 +48,23 @@ function zoomOut() {
   setZoom(zoom.value - ZOOM_STEP)
 }
 
+function resetZoom() {
+  setZoom(1)
+}
+
 function onWheelZoom(direction) {
   setZoom(zoom.value + direction * ZOOM_STEP)
 }
 
+let hasFilledThisStroke = false
+
 function onPaint({ row, col }) {
+  if (tool.value === 'fill') {
+    if (hasFilledThisStroke) return
+    hasFilledThisStroke = true
+    floodFill(chart, row, col, currentColor.value)
+    return
+  }
   const colorIndex = tool.value === 'erase' ? 0 : currentColor.value
   setCell(chart, row, col, colorIndex)
 }
@@ -90,6 +111,7 @@ function snapshot() {
 }
 
 function pushHistory() {
+  hasFilledThisStroke = false
   history.value.push(snapshot())
   redoStack.value = []
 }
@@ -111,22 +133,21 @@ function onClear() {
   clearChart(chart)
 }
 
-function onKeydown(e) {
-  const mod = e.ctrlKey || e.metaKey
-  if (!mod) return
-  const key = e.key.toLowerCase()
+// --- keyboard shortcuts ---
+const isSpacePanning = ref(false)
+const showShortcuts = ref(false)
 
-  if (key === 'z' && !e.shiftKey) {
-    e.preventDefault()
-    undo()
-  } else if ((key === 'y' && !e.metaKey) || (key === 'z' && e.shiftKey)) {
-    e.preventDefault()
-    redo()
-  }
-}
-
-onMounted(() => window.addEventListener('keydown', onKeydown))
-onUnmounted(() => window.removeEventListener('keydown', onKeydown))
+useKeyboardShortcuts({
+  setTool: (t) => (tool.value = t),
+  undo,
+  redo,
+  clear: onClear,
+  zoomIn,
+  zoomOut,
+  resetZoom,
+  isPanning: isSpacePanning,
+  toggleShortcuts: () => (showShortcuts.value = !showShortcuts.value),
+})
 </script>
 
 <template>
@@ -152,6 +173,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
       @zoom-in="zoomIn"
       @zoom-out="zoomOut"
       @update-zoom="setZoom"
+      @toggle-shortcuts="showShortcuts = !showShortcuts"
     />
     <div class="canvas-row">
       <PalettePanel
@@ -170,12 +192,14 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
           :mode="canvasMode"
           :gauge="gauge"
           :zoom="zoom"
+          :pan-mode="isSpacePanning"
           @paint="onPaint"
           @stroke-start="pushHistory"
           @zoom="onWheelZoom"
         />
       </div>
     </div>
+    <KeyboardShortcutsOverlay :open="showShortcuts" @close="showShortcuts = false" />
   </div>
 </template>
 

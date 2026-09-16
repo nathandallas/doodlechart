@@ -20,6 +20,23 @@ export function setCell(chart, row, col, colorIndex) {
   return true
 }
 
+export function floodFill(chart, row, col, colorIndex) {
+  if (row < 0 || row >= chart.rows || col < 0 || col >= chart.cols) return false
+  const { cells, rows, cols } = chart
+  const target = cells[row][col]
+  if (target === colorIndex) return false
+
+  const stack = [[row, col]]
+  while (stack.length) {
+    const [r, c] = stack.pop()
+    if (r < 0 || r >= rows || c < 0 || c >= cols) continue
+    if (cells[r][c] !== target) continue
+    cells[r][c] = colorIndex
+    stack.push([r + 1, c], [r - 1, c], [r, c + 1], [r, c - 1])
+  }
+  return true
+}
+
 export function resizeChart(chart, cols, rows) {
   cols = Math.max(1, Math.floor(cols))
   rows = Math.max(1, Math.floor(rows))

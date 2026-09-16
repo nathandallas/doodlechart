@@ -4,33 +4,48 @@ A colorwork tool for fiber artists.
 
 ### TODO List
 
-- Styling
+- Styling & Responsive
+  - Mobile Responsive 
 
 - Home Page
+  - Gallery Section
+  - Chart previews
+  - Footer with credits 
 
 - Editor Page
   - General
-    - Give user option to create a custom grid or start with a preset one
     - Knitting mode
-    - Undo/Redo color changes only
-    - Local Storage for settings and drawings
-
+      - highlight working row/section
+      - nav arrows/keys
+      - stitch color reference bar
+    - Local storage persistence for settings and drawings
+    - Scroll bars outside grid numbers for oversized charts
   - Grid
-    - optional - thicker lines for 5x5 sections, default can be changed to user preference
-
+    - Optional thicker gridlines every N stitches
   - Gauge
-    - Calculator for the final size of an object based on gauge and stitch count
-
+    - Finished size calculator based on gauge/stitch count
+  - Palette
+    - Yarn colorway browser 
+    - Reorder palette colors
+    - Name palette colors
   - Nice to have
-    - repeats
-    - symmetry
-    - select and move / cut / paste
+    - Stitch symbols overlay
+    - Pattern repeats
+    - Symmetry tools
+    - Select, move, cut, paste
 
-- About Page will change to manual page
+- GridSetupModal
+  - Close on outside/backdrop click
+  - Close on page refresh (reset state)
 
 - Gallery Page
-  - Save to gallery
+  - Save charts to gallery
   - Delete from gallery
-  - Customize (open in Editor)
-  - Download (as .png)
-  - User auth?
+  - Open saved chart in Editor
+  - Download as PNG or PDF
+  - Unique shareable URL per chart (public/private toggle)
+  - Optional user name + description 
+
+- Help / Manual Page
+
+- Accessibility

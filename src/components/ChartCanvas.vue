@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watchEffect, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, watchEffect, onMounted, onBeforeUnmount } from 'vue'
 import { traceStitchPath, stitchViewSize, stitchAtPoint } from '../engine/geometry.js'
 import { stitchDimensionsForGauge } from '../engine/gauge.js'
 
@@ -8,11 +8,13 @@ const props = defineProps({
   mode: { type: String, default: 'grid' },
   gauge: { type: [String, Object], default: 'worsted' },
   zoom: { type: Number, default: 1 },
+  panMode: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['paint', 'stroke-start', 'stroke-end', 'zoom'])
 
 const isPainting = ref(false)
+const isPanDragging = ref(false)
 const hoveredCell = ref(null)
 const viewportEl = ref(null)
 const canvasEl = ref(null)
@@ -248,6 +250,16 @@ function handlePointerDown(e) {
     panState = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
     return
   }
+
+  //  space + drag (mouse/pen) pans instead of painting
+  if (props.panMode && e.pointerType !== 'touch') {
+    if (panState) return
+    panState = { x: e.clientX, y: e.clientY, pointerId: e.pointerId }
+    isPanDragging.value = true
+    canvasEl.value.setPointerCapture(e.pointerId)
+    return
+  }
+
   if (panState || drawPointerId !== null) return
 
   drawPointerId = e.pointerId
@@ -264,10 +276,19 @@ function handlePointerMove(e) {
   }
 
   if (panState) {
-    const pts = [...activePointers.values()]
-    if (pts.length < 2) return
-    const cx = (pts[0].x + pts[1].x) / 2
-    const cy = (pts[0].y + pts[1].y) / 2
+    let cx, cy
+    if (panState.pointerId !== undefined) {
+      // mouse pan
+      if (e.pointerId !== panState.pointerId) return
+      cx = e.clientX
+      cy = e.clientY
+    } else {
+      // touch pan
+      const pts = [...activePointers.values()]
+      if (pts.length < 2) return
+      cx = (pts[0].x + pts[1].x) / 2
+      cy = (pts[0].y + pts[1].y) / 2
+    }
     viewportEl.value?.scrollBy(panState.x - cx, panState.y - cy)
     panState.x = cx
     panState.y = cy
@@ -293,12 +314,30 @@ function handlePointerLeave() {
   hoveredCell.value = null
 }
 
+function releasePanPointer(pointerId) {
+  if (canvasEl.value?.hasPointerCapture(pointerId)) {
+    canvasEl.value.releasePointerCapture(pointerId)
+  }
+  panState = null
+  isPanDragging.value = false
+}
+
 function handlePointerUp(e) {
   activePointers.delete(e.pointerId)
-  if (panState && activePointers.size < 2) panState = null
+  if (panState) {
+    if (panState.pointerId === e.pointerId) releasePanPointer(e.pointerId)
+    else if (activePointers.size < 2) panState = null
+  }
   if (e.pointerId === drawPointerId) endStroke()
   if (e.pointerType === 'touch') hoveredCell.value = null
 }
+
+watch(
+  () => props.panMode,
+  (active) => {
+    if (!active && panState?.pointerId !== undefined) releasePanPointer(panState.pointerId)
+  },
+)
 
 function handleScroll(e) {
   scrollX.value = e.target.scrollLeft
@@ -373,6 +412,7 @@ onBeforeUnmount(() => {
         <canvas
           ref="canvasEl"
           class="chart-canvas"
+          :class="{ 'pan-grab': panMode && !isPanDragging, 'pan-grabbing': isPanDragging }"
           :style="{ width: viewW + 'px', height: viewH + 'px' }"
           @pointerdown="handlePointerDown"
           @pointermove="handlePointerMove"
@@ -438,6 +478,14 @@ onBeforeUnmount(() => {
   left: 0;
   display: block;
   touch-action: none;
+}
+
+.chart-canvas.pan-grab {
+  cursor: grab;
+}
+
+.chart-canvas.pan-grabbing {
+  cursor: grabbing;
 }
 
 .chart-labels {

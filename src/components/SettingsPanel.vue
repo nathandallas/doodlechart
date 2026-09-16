@@ -28,6 +28,7 @@ const emit = defineEmits([
   'zoom-in',
   'zoom-out',
   'update-zoom',
+  'toggle-shortcuts',
 ])
 
 const tabs = [
@@ -70,6 +71,7 @@ const activeTab = ref(tabs[0].id)
           @zoom-in="emit('zoom-in')"
           @zoom-out="emit('zoom-out')"
           @update-zoom="emit('update-zoom', $event)"
+          @toggle-shortcuts="emit('toggle-shortcuts')"
         />
       </div>
 
