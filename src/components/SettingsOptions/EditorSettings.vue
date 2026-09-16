@@ -170,7 +170,6 @@ function onZoomInputChange(e) {
   height: 32px;
   border: none;
   text-align: center;
-  font-size: 1rem;
   padding: 0;
   cursor: text;
   user-select: text;

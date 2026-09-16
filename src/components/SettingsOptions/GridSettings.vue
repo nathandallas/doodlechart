@@ -113,12 +113,8 @@ function applySize(cols, rows) {
 .swatch {
   width: 32px;
   height: 32px;
-  padding: 0;
-  border: 1px solid var(--text-primary);
-  cursor: pointer;
   appearance: none;
   background: none;
-  border-radius: 0;
   box-shadow: none;
 }
 

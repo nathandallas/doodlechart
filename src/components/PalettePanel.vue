@@ -84,10 +84,6 @@ function handleSwatchClick(i, toggle) {
 .swatch {
   width: 2.5rem;
   height: 2.5rem;
-  padding: 0;
-  border: 1px solid var(--text-primary);
-  border-radius: 0;
-  cursor: pointer;
 }
 .swatch.selected {
   border: 2px solid var(--text-primary);
@@ -98,7 +94,6 @@ function handleSwatchClick(i, toggle) {
   right: 0px;
   width: 20px;
   height: 20px;
-  font-size: 1rem;
   line-height: 1;
   background: none;
   border: none;
@@ -129,7 +124,6 @@ function handleSwatchClick(i, toggle) {
   padding: 0;
   width: 2.5rem;
   height: 2.5rem;
-  font-size: 1rem;
   line-height: 1rem;
   border-radius: 0;
 }

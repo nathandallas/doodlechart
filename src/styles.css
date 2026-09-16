@@ -150,3 +150,25 @@ button:disabled {
   width: 1px;
   background: var(--grid);
 }
+
+dialog {
+  margin: auto;
+  border: none;
+  border-radius: 16px;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  background: var(--background);
+  color: var(--text-primary);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.swatch {
+  padding: 0;
+  border: 1px solid var(--text-primary);
+  border-radius: 0;
+  cursor: pointer;
+}

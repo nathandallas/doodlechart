@@ -88,21 +88,9 @@ function onBackdropClick(e) {
 
 <style scoped>
 .shortcuts-modal {
-  margin: auto;
-  border: none;
-  border-radius: 16px;
   padding: 1.5rem;
   width: 400px;
   max-width: calc(100vw - 2rem);
-  max-height: calc(100vh - 4rem);
-  overflow-y: auto;
-  background: var(--background);
-  color: var(--text-primary);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-}
-
-.shortcuts-modal::backdrop {
-  background: rgba(0, 0, 0, 0.5);
 }
 
 .shortcuts-modal h2 {
