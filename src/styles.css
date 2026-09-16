@@ -1,3 +1,9 @@
+/* ---- Breakpoints ----
+ * Mobile:  max-width: 640px
+ * Tablet:  641px – 1024px
+ * Desktop: 1025px+
+ * ---- */
+
 @font-face {
   font-family: 'Fixel';
   src: url('../src/assets/fonts/FixelText-Regular.woff2');
@@ -171,4 +177,26 @@ dialog::backdrop {
   border: 1px solid var(--text-primary);
   border-radius: 0;
   cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none;
+  }
+}
+
+@media (min-width: 1025px) {
+  .hide-desktop {
+    display: none;
+  }
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .mobile-only {
+    display: block;
+  }
 }
