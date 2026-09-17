@@ -4,6 +4,7 @@ import { SketchPicker } from 'vue-color'
 
 defineProps({
   modelValue: { type: String, required: true },
+  placement: { type: String, default: 'bottom' },
 })
 const emit = defineEmits(['update:modelValue'])
 
@@ -32,7 +33,7 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', handleOutsideC
 <template>
   <div ref="rootEl" class="picker-wrap">
     <slot :open="open" :toggle="toggle" :close="close" />
-    <div v-if="open" class="picker-popover">
+    <div v-if="open" class="picker-popover" :class="{ 'picker-popover--top': placement === 'top' }">
       <SketchPicker
         :model-value="modelValue"
         disable-alpha
@@ -53,5 +54,10 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', handleOutsideC
   z-index: 20;
   top: calc(100% + 4px);
   left: 0;
+}
+
+.picker-popover--top {
+  top: auto;
+  bottom: calc(100% + 4px);
 }
 </style>

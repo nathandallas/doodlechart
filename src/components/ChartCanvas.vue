@@ -9,6 +9,8 @@ const props = defineProps({
   gauge: { type: [String, Object], default: 'worsted' },
   zoom: { type: Number, default: 1 },
   panMode: { type: Boolean, default: false },
+  // Size the viewport to the parent's height instead of the 70vh cap
+  fill: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['paint', 'stroke-start', 'stroke-end', 'zoom'])
@@ -302,7 +304,6 @@ function handlePointerMove(e) {
 
   if (!isPainting.value || e.pointerId !== drawPointerId) return
 
-  
   const points = e.getCoalescedEvents?.() ?? []
   for (const p of points.length ? points : [e]) {
     const cell = cellAt(p.clientX, p.clientY, rect)
@@ -371,7 +372,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="chart-grid-wrapper" :style="{ '--zoom': zoom }">
+  <div
+    class="chart-grid-wrapper"
+    :class="{ 'chart-grid-wrapper--fill': fill }"
+    :style="{ '--zoom': zoom }"
+  >
     <div class="chart-labels chart-labels-top" :style="{ width: viewW + 'px' }">
       <div class="label-track" :style="{ transform: `translateX(${-scrollX}px)` }">
         <span
@@ -470,6 +475,17 @@ onBeforeUnmount(() => {
   overflow: auto;
   max-width: 100%;
   max-height: 70vh;
+}
+
+/* The middle row grows only into the height left over after the label rows */
+.chart-grid-wrapper--fill {
+  height: 100%;
+  align-content: start;
+  margin: 0 auto;
+}
+
+.chart-grid-wrapper--fill .chart-viewport {
+  max-height: 100%;
 }
 
 .chart-canvas {

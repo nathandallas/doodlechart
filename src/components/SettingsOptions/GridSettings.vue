@@ -23,7 +23,7 @@ function applySize(cols, rows) {
       <button
         type="button"
         class="icon-btn"
-        :class="{ active: mode === 'grid' }"
+        :class="{ 'btn-active': mode === 'grid' }"
         @click="emit('update-mode', 'grid')"
       >
         <RectangleHorizontal color="var(--text-inverse)" :stroke-width="1.8" />
@@ -31,7 +31,7 @@ function applySize(cols, rows) {
       <button
         type="button"
         class="icon-btn"
-        :class="{ active: mode === 'chevron' }"
+        :class="{ 'btn-active': mode === 'chevron' }"
         @click="emit('update-mode', 'chevron')"
       >
         <ChevronIcon color="var(--text-inverse)" />
@@ -39,7 +39,7 @@ function applySize(cols, rows) {
       <button
         type="button"
         class="icon-btn"
-        :class="{ active: mode === 'square-grid' }"
+        :class="{ 'btn-active': mode === 'square-grid' }"
         @click="emit('update-mode', 'square-grid')"
       >
         <Square color="var(--text-inverse)" :stroke-width="1.8" />
