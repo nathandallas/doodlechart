@@ -15,5 +15,15 @@ footer {
 }
 .credit {
   padding-bottom: 2rem;
+  transition:
+    font-size 0.2s ease,
+    padding 0.2s ease;
+}
+
+@media (max-width: 640px) {
+  .credit {
+    padding: 0 1rem 2rem;
+    font-size: 0.9rem;
+  }
 }
 </style>

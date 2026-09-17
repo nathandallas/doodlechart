@@ -1,12 +1,18 @@
 <script setup>
+import { computed } from 'vue'
+import { useWindowScroll } from '@vueuse/core'
 import { useTheme } from '../composables/useTheme.js'
+import { useBreakpoints } from '../composables/useBreakpoints.js'
 import { Sun, Moon } from '@lucide/vue'
 
 const { theme, toggleTheme } = useTheme()
+const { isMobile } = useBreakpoints()
+const { y: scrollY } = useWindowScroll()
+const scrolled = computed(() => isMobile.value && scrollY.value > 8)
 </script>
 
 <template>
-  <header class="site-header">
+  <header class="site-header" :class="{ scrolled }">
     <div class="nav-bar">
       <div class="brand">
         <svg class="logo" viewBox="0 0 418.28085 512.19568" xmlns="http://www.w3.org/2000/svg">
@@ -42,10 +48,12 @@ const { theme, toggleTheme } = useTheme()
   </header>
 </template>
 
-<style>
+<style scoped>
 header {
-  position: relative;
-  z-index: 1;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: filter 0.25s ease;
 }
 .nav-bar {
   display: flex;
@@ -53,12 +61,21 @@ header {
   align-items: center;
   background: var(--secondary);
   padding: 1rem;
+  transition: padding 0.2s ease;
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+h1 {
+  transition: font-size 0.2s ease;
+}
+
+nav {
+  transition: gap 0.2s ease;
 }
 
 .logo {
@@ -77,6 +94,9 @@ header {
 nav a {
   padding-right: 1rem;
   text-decoration: none;
+  transition:
+    padding-right 0.2s ease,
+    font-size 0.2s ease;
 }
 
 nav a:last-child {
@@ -108,5 +128,42 @@ nav a.router-link-exact-active:hover {
   padding: 0.5rem;
   color: inherit;
   box-shadow: none;
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .nav-bar {
+    padding: 0.85rem 0.75rem;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  nav a {
+    padding-right: 0.6rem;
+  }
+}
+
+@media (max-width: 640px) {
+  h1 {
+    display: none;
+  }
+
+  nav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  nav a {
+    padding-right: 0;
+    font-size: 1.4rem;
+  }
+
+  /* drop-shadow follows the wave's curve; box-shadow would not */
+  header.scrolled {
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+  }
 }
 </style>

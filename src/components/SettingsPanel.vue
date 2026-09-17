@@ -117,7 +117,6 @@ const activeTab = ref(tabs[0].id)
   border-radius: 8px 8px 0 0;
   padding: 0.5rem 0.9rem;
   font-weight: 200;
-  font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-primary);

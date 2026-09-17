@@ -75,21 +75,9 @@ function confirm() {
 
 <style scoped>
 .setup-modal {
-  margin: auto;
-  border: none;
-  border-radius: 16px;
   padding: 2rem;
   min-width: 660px;
   max-width: 90vw;
-  max-height: calc(100vh - 4rem);
-  overflow-y: auto;
-  background: var(--background);
-  color: var(--text-primary);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-}
-
-.setup-modal::backdrop {
-  background: rgba(0, 0, 0, 0.5);
 }
 
 .actions {
