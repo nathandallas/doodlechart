@@ -6,6 +6,7 @@ import ColorPickerPopover from '../ColorPickerPopover.vue'
 defineProps({
   chart: { type: Object, required: true },
   mode: { type: String, required: true },
+  stacked: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['update-mode', 'resize', 'update-grid-color', 'update-grid-opacity'])
@@ -16,38 +17,40 @@ function applySize(cols, rows) {
 </script>
 
 <template>
-  <div class="options">
-    <label>Shape</label>
-    <button
-      type="button"
-      class="icon-btn"
-      :class="{ active: mode === 'grid' }"
-      @click="emit('update-mode', 'grid')"
-    >
-      <RectangleHorizontal color="var(--text-inverse)" :stroke-width="1.8" />
-    </button>
-    <button
-      type="button"
-      class="icon-btn"
-      :class="{ active: mode === 'chevron' }"
-      @click="emit('update-mode', 'chevron')"
-    >
-      <ChevronIcon color="var(--text-inverse)" />
-    </button>
-    <button
-      type="button"
-      class="icon-btn"
-      :class="{ active: mode === 'square-grid' }"
-      @click="emit('update-mode', 'square-grid')"
-    >
-      <Square color="var(--text-inverse)" :stroke-width="1.8" />
-    </button>
+  <div class="options" :class="{ stacked }">
+    <label class="heading">Shape</label>
+    <div class="shapes">
+      <button
+        type="button"
+        class="icon-btn"
+        :class="{ active: mode === 'grid' }"
+        @click="emit('update-mode', 'grid')"
+      >
+        <RectangleHorizontal color="var(--text-inverse)" :stroke-width="1.8" />
+      </button>
+      <button
+        type="button"
+        class="icon-btn"
+        :class="{ active: mode === 'chevron' }"
+        @click="emit('update-mode', 'chevron')"
+      >
+        <ChevronIcon color="var(--text-inverse)" />
+      </button>
+      <button
+        type="button"
+        class="icon-btn"
+        :class="{ active: mode === 'square-grid' }"
+        @click="emit('update-mode', 'square-grid')"
+      >
+        <Square color="var(--text-inverse)" :stroke-width="1.8" />
+      </button>
+    </div>
 
     <div class="divider" aria-hidden="true"></div>
 
-    <label>Size</label>
+    <label class="heading">Size</label>
     <label class="sub">
-      Stitches
+      <span>Stitches</span>
       <input
         type="number"
         min="1"
@@ -57,7 +60,7 @@ function applySize(cols, rows) {
       />
     </label>
     <label class="sub">
-      Rows
+      <span>Rows</span>
       <input
         type="number"
         min="1"
@@ -69,6 +72,7 @@ function applySize(cols, rows) {
 
     <div class="divider" aria-hidden="true"></div>
 
+    <label v-if="stacked" class="heading">Grid Lines</label>
     <label>Color</label>
     <ColorPickerPopover
       :model-value="chart.gridColor"
@@ -110,6 +114,11 @@ function applySize(cols, rows) {
   gap: 8px;
 }
 
+.shapes {
+  display: flex;
+  gap: 8px;
+}
+
 .swatch {
   width: 32px;
   height: 32px;
@@ -129,5 +138,41 @@ function applySize(cols, rows) {
 
 input {
   width: 80px;
+}
+
+.stacked {
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.stacked .heading,
+.stacked .shapes,
+.stacked .divider {
+  grid-column: 1 / -1;
+}
+
+.stacked .heading {
+  font-weight: 600;
+}
+
+.stacked .divider {
+  width: auto;
+  height: 1px;
+  margin: 1rem 0;
+}
+
+.stacked .sub {
+  display: contents;
+  font-size: inherit;
+}
+
+.stacked .sub input {
+  width: 8rem;
+}
+
+.stacked .opacity-slider {
+  width: 100%;
 }
 </style>
