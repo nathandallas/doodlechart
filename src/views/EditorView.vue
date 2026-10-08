@@ -1,22 +1,20 @@
 <script setup>
 import { reactive, ref } from 'vue'
-import {
-  createChart,
-  setCell,
-  floodFill,
-  removeColor,
-  resizeChart,
-  clearChart,
-} from '../engine/chart.js'
+import { createChart, setCell, floodFill, removeColor, clearChart } from '../engine/chart.js'
 
-import ChartCanvas from '../components/ChartCanvas.vue'
-import PalettePanel from '@/components/PalettePanel.vue'
-import NavBar from '@/components/NavBar.vue'
-import SettingsPanel from '@/components/SettingsPanel.vue'
+import ChartCanvas from '@/components/ChartCanvas.vue'
+import EditorTopBar from '@/components/EditorTopBar.vue'
+import EditorToolbar from '@/components/EditorToolbar.vue'
+import PaletteBar from '@/components/PaletteBar.vue'
 import KeyboardShortcutsOverlay from '@/components/KeyboardShortcutsOverlay.vue'
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
 import { useChartSetupStore } from '@/stores/chartSetup'
 const setup = useChartSetupStore()
+
+// Consumed by the menu and settings overlays
+const showMenu = ref(false)
+const showSettings = ref(false)
+
 const chart = reactive(createChart(setup.cols, setup.rows))
 chart.palette = [...setup.palette]
 chart.gridColor = setup.gridColor
@@ -69,32 +67,20 @@ function onPaint({ row, col }) {
   setCell(chart, row, col, colorIndex)
 }
 
-// --- gauge ---
-function updateGauge(g) {
-  gauge.value = g
-}
-
-// --- grid ---
-function onResize({ cols, rows }) {
-  resizeChart(chart, cols, rows)
-}
-
-function updateGridColor(color) {
-  chart.gridColor = color
-}
-
-function updateGridOpacity(opacity) {
-  chart.gridOpacity = opacity
-}
-
 // --- palette ---
 function updateColor({ index, color }) {
   chart.palette[index] = color
 }
 
+// Picking a color while erasing means the user wants to paint again
+function selectColor(index) {
+  currentColor.value = index
+  if (tool.value === 'erase') tool.value = 'paint'
+}
+
 function addColor() {
   chart.palette.push('#d85a30')
-  currentColor.value = chart.palette.length - 1
+  selectColor(chart.palette.length - 1)
 }
 
 // When color is removed or updated cells are replaced with bg color
@@ -151,78 +137,75 @@ useKeyboardShortcuts({
 </script>
 
 <template>
-  <NavBar />
-  <div class="editor">
-    <SettingsPanel
-      :chart="chart"
-      :mode="canvasMode"
+  <div class="editor-layout">
+    <EditorTopBar
+      @open-menu="showMenu = !showMenu"
+      @open-settings="showSettings = !showSettings"
+      @toggle-shortcuts="showShortcuts = !showShortcuts"
+    />
+    <EditorToolbar
       :tool="tool"
       :can-undo="history.length > 0"
       :can-redo="redoStack.length > 0"
       :zoom="zoom"
-      :gauge="gauge"
-      @update-mode="canvasMode = $event"
       @update-tool="tool = $event"
       @undo="undo"
       @redo="redo"
       @clear="onClear"
-      @resize="onResize"
-      @update-grid-color="updateGridColor"
-      @update-grid-opacity="updateGridOpacity"
-      @update-gauge="updateGauge"
       @zoom-in="zoomIn"
       @zoom-out="zoomOut"
-      @update-zoom="setZoom"
-      @toggle-shortcuts="showShortcuts = !showShortcuts"
+      @reset-zoom="resetZoom"
     />
-    <div class="canvas-row">
-      <PalettePanel
-        class="palette-sidebar"
-        vertical
-        :palette="chart.palette"
-        :selected="currentColor"
-        @select="currentColor = $event"
-        @update-color="updateColor"
-        @add-color="addColor"
-        @remove-color="onRemoveColor"
+    <div class="editor-canvas">
+      <ChartCanvas
+        fill
+        :chart="chart"
+        :mode="canvasMode"
+        :gauge="gauge"
+        :zoom="zoom"
+        :pan-mode="isSpacePanning"
+        @paint="onPaint"
+        @stroke-start="pushHistory"
+        @zoom="onWheelZoom"
       />
-      <div class="canvas-scroll">
-        <ChartCanvas
-          :chart="chart"
-          :mode="canvasMode"
-          :gauge="gauge"
-          :zoom="zoom"
-          :pan-mode="isSpacePanning"
-          @paint="onPaint"
-          @stroke-start="pushHistory"
-          @zoom="onWheelZoom"
-        />
-      </div>
     </div>
+    <PaletteBar
+      :palette="chart.palette"
+      :selected="currentColor"
+      @select="selectColor"
+      @update-color="updateColor"
+      @add-color="addColor"
+      @remove-color="onRemoveColor"
+    />
     <KeyboardShortcutsOverlay :open="showShortcuts" @close="showShortcuts = false" />
   </div>
 </template>
 
 <style scoped>
-.editor {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding-left: 1rem;
-}
-
-.canvas-row {
+.editor-layout {
   display: flex;
-  align-items: flex-start;
-  gap: 2rem;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
-.palette-sidebar {
-  flex-shrink: 0;
-  padding: 0;
+.editor-canvas {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0.5rem 0.25rem;
 }
 
-.canvas-scroll {
-  min-width: 0;
-  padding: 1rem 1.5rem 1.5rem 0;
+@media (min-width: 641px) {
+  .editor-canvas {
+    padding: 1rem 1.5rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .editor-canvas {
+    padding: 1.5rem 2.5rem;
+  }
 }
 </style>

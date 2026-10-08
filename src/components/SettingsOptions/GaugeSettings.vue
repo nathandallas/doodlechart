@@ -4,6 +4,7 @@ import { YARN_PRESETS } from '../../engine/gauge.js'
 
 const props = defineProps({
   gauge: { type: Object, default: null },
+  stacked: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update-gauge'])
 
@@ -98,7 +99,7 @@ function toggleUnits() {
 </script>
 
 <template>
-  <div class="gauge-settings">
+  <div class="gauge-settings" :class="{ stacked }">
     <div class="weight">
       <div class="field-label">Yarn Weight</div>
       <select v-model="preset">
@@ -185,5 +186,42 @@ function toggleUnits() {
 
 .field input {
   max-width: 80px;
+}
+
+.gauge-settings.stacked {
+  flex-direction: column;
+}
+
+.stacked .weight {
+  margin-right: 0;
+}
+
+.stacked .field-label {
+  font-weight: 600;
+}
+
+.stacked select {
+  width: 100%;
+}
+
+.stacked .edit-gauge {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+}
+
+/* Flatten rows so the unit toggle can sit below both */
+.stacked .row {
+  display: contents;
+}
+
+.stacked .field:not(.unit) {
+  min-width: 0;
+}
+
+.stacked .unit-toggle {
+  order: 1;
+  grid-column: 1 / -1;
+  margin-top: 0;
 }
 </style>
